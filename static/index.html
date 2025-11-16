@@ -24,6 +24,16 @@
             padding: 0;
         }
 
+        /* Hide everything initially to prevent flash */
+        .app-container {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .app-loaded {
+            opacity: 1;
+        }
+
         .glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
@@ -84,32 +94,41 @@
         }
 
         #customSelectDropdown {
-            background: rgba(30, 27, 75, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(30, 27, 75, 0.95);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            background-image: 
-                linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%),
-                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, transparent 1px, transparent 2px, rgba(255, 255, 255, 0.03) 3px);
+            transform-origin: top;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+
+        #customSelectDropdown.dropdown-hidden {
+            opacity: 0;
+            transform: scaleY(0.95);
+            pointer-events: none;
+        }
+
+        #customSelectDropdown.dropdown-visible {
+            opacity: 1;
+            transform: scaleY(1);
+            pointer-events: auto;
         }
 
         .custom-option {
             padding: 0.75rem 1rem;
             color: rgba(255, 255, 255, 0.95);
-            border-radius: 0.75rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            transition: all 0.15s ease;
             font-size: 0.9rem;
         }
 
         .custom-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .custom-option.selected {
-            background: rgba(167, 139, 250, 0.4);
+            background: rgba(167, 139, 250, 0.25);
             font-weight: 500;
-            color: rgba(255, 255, 255, 1);
         }
 
         #customSelectDropdown::-webkit-scrollbar {
@@ -134,32 +153,6 @@
         .modal-backdrop {
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
-        }
-
-        .pulse-slow {
-            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .resource-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .resource-fill {
-            height: 100%;
-            transition: width 0.5s ease;
-            background: linear-gradient(90deg, #8b5cf6, #ec4899);
         }
 
         .drag-over {
@@ -231,64 +224,17 @@
 <body class="min-h-screen p-4 md:p-8">
 
     <!-- Main Container -->
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto app-container" id="appContainer">
         <!-- Header -->
-        <header class="text-center mb-12 fade-in">
+        <header class="text-center mb-12">
             <h1 class="text-6xl md:text-7xl font-bold gradient-text mb-4">Lyrebird</h1>
             <p class="text-white/60 text-lg">Neural Voice Synthesis</p>
         </header>
 
-        <!-- Resource Monitor -->
-        <div class="glass rounded-2xl p-6 mb-8 fade-in" style="animation-delay: 0.1s">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- CPU Usage -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-white/60 text-sm font-medium">CPU</span>
-                        <span class="text-white font-semibold" id="cpuValue">0%</span>
-                    </div>
-                    <div class="resource-bar">
-                        <div class="resource-fill" id="cpuBar" style="width: 0%"></div>
-                    </div>
-                </div>
-                <!-- RAM Usage -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-white/60 text-sm font-medium">RAM</span>
-                        <span class="text-white font-semibold" id="ramValue">0%</span>
-                    </div>
-                    <div class="resource-bar">
-                        <div class="resource-fill" id="ramBar" style="width: 0%"></div>
-                    </div>
-                </div>
-                <!-- Queue -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-white/60 text-sm font-medium">Queue</span>
-                        <span class="text-white font-semibold" id="queueValue">0</span>
-                    </div>
-                    <div class="resource-bar">
-                        <div class="resource-fill" id="queueBar" style="width: 0%"></div>
-                    </div>
-                </div>
-                <!-- Status -->
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-white/60 text-sm font-medium">Status</span>
-                        <span class="text-green-400 font-semibold flex items-center gap-2">
-                            <span class="w-2 h-2 bg-green-400 rounded-full pulse-slow"></span>
-                            <span id="statusValue">Online</span>
-                        </span>
-                    </div>
-                    <div class="text-white/40 text-xs" id="deviceInfo">Loading...</div>
-                </div>
-            </div>
-        </div>
-
         <div class="grid lg:grid-cols-3 gap-8">
             <!-- Main Form -->
             <div class="lg:col-span-2">
-                <div class="glass-strong rounded-3xl p-8 fade-in" style="animation-delay: 0.2s">
+                <div class="glass-strong rounded-3xl p-8">
                     <form id="cloneForm" class="space-y-6">
                         <!-- Text Input -->
                         <div>
@@ -333,7 +279,7 @@
 
                                 <div 
                                     id="customSelectDropdown"
-                                    class="hidden absolute z-50 w-full mt-2 rounded-xl p-2 max-h-60 overflow-y-auto"
+                                    class="dropdown-hidden absolute z-50 w-full mt-2 rounded-xl p-2 max-h-60 overflow-y-auto"
                                 >
                                     <!-- Options will be added by JavaScript -->
                                 </div>
@@ -384,7 +330,7 @@
             <div class="lg:col-span-1 space-y-6">
 
                 <!-- Processing Card -->
-                <div id="processingCard" class="hidden glass-strong rounded-3xl p-6 fade-in" style="animation-delay: 0.3s">
+                <div id="processingCard" class="hidden glass-strong rounded-3xl p-6">
                     <h3 class="text-white font-semibold text-lg mb-4">Processing</h3>
                     <div class="space-y-3">
                         <div class="relative h-2 bg-white/10 rounded-full overflow-hidden">
@@ -395,7 +341,7 @@
                 </div>
 
                 <!-- New Sleek Audio Player -->
-                <div id="newAudioPlayer" class="hidden glass-strong rounded-3xl p-4 fade-in">
+                <div id="newAudioPlayer" class="hidden glass-strong rounded-3xl p-4">
                     <audio id="audioPlayer" class="hidden"></audio>
                     <div class="flex items-center gap-3">
                         <!-- Play/Pause Button -->
@@ -429,8 +375,7 @@
                 <!-- Info Button -->
                 <button 
                     onclick="openModal()" 
-                    class="glass w-full rounded-2xl p-6 text-left transition-all hover:bg-white/10 fade-in"
-                    style="animation-delay: 0.3s"
+                    class="glass w-full rounded-2xl p-6 text-left transition-all hover:bg-white/10"
                 >
                     <div class="flex items-center justify-between">
                         <div>
@@ -443,27 +388,8 @@
                     </div>
                 </button>
 
-                <!-- Stats -->
-                <div class="glass rounded-2xl p-6 fade-in" style="animation-delay: 0.4s">
-                    <h3 class="text-white font-semibold mb-4">System Stats</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-white/60 text-sm">Model</span>
-                            <span class="text-white text-sm font-medium" id="modelInfo">XTTS v2</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-white/60 text-sm">Languages</span>
-                            <span class="text-white text-sm font-medium" id="langCount">17</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-white/60 text-sm">Uptime</span>
-                            <span class="text-white text-sm font-medium" id="uptime">--:--</span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Warning -->
-                <div class="glass rounded-2xl p-6 border border-yellow-500/20 fade-in" style="animation-delay: 0.5s">
+                <div class="glass rounded-2xl p-6 border border-yellow-500/20">
                     <p class="text-yellow-200/80 text-xs leading-relaxed">
                         For personal and research use only. Always obtain consent before cloning voices.
                     </p>
@@ -533,14 +459,20 @@
     <script>
         let currentJobId = null;
         let pollInterval = null;
-        let resourceInterval = null;
-        let uptimeStart = Date.now();
+        let languagesCache = null; // Cache languages to avoid refetching
+        let dropdownOpen = false;
         
         // API endpoint configuration
         const API_BASE_URL = ""; 
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
+            // Load languages first
+            await loadLanguages();
+            
+            // Setup all event listeners
+            setupEventListeners();
+            
             // Check for existing job in localStorage
             const existingJobId = localStorage.getItem('active_lyrebird_job');
             
@@ -554,13 +486,11 @@
                 
                 pollJobStatus();
             }
-
-            await loadSystemInfo();
-            await loadLanguages();
-            setupEventListeners();
-            startResourceMonitoring();
-            updateUptime();
-            setInterval(updateUptime, 1000);
+            
+            // Show the app once everything is loaded
+            setTimeout(() => {
+                document.getElementById('appContainer').classList.add('app-loaded');
+            }, 50);
         });
 
         // Modal functions
@@ -574,70 +504,7 @@
             document.getElementById('modal').classList.remove('flex');
         }
 
-        // Update uptime
-        function updateUptime() {
-            const elapsed = Date.now() - uptimeStart;
-            const minutes = Math.floor(elapsed / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
-            document.getElementById('uptime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Resource monitoring
-        async function startResourceMonitoring() {
-            updateResources();
-            resourceInterval = setInterval(updateResources, 2000);
-        }
-
-        async function updateResources() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/resources`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    console.error('Resource API error:', data.error);
-                    return;
-                }
-
-                // Update CPU
-                const cpu = data.cpu.percent;
-                document.getElementById('cpuValue').textContent = cpu + '%';
-                document.getElementById('cpuBar').style.width = cpu + '%';
-                
-                // Update RAM
-                const ram = data.ram.percent;
-                document.getElementById('ramValue').textContent = ram + '%';
-                document.getElementById('ramBar').style.width = ram + '%';
-                
-                // Update Queue
-                const queue = data.queue.count;
-                document.getElementById('queueValue').textContent = queue;
-                document.getElementById('queueBar').style.width = Math.min(queue * 20, 100) + '%';
-                
-                if (data.container !== undefined) {
-                    console.log('Running in container:', data.container);
-                }
-            } catch (error) {
-                console.error('Resource monitoring error:', error);
-            }
-        }
-
-        // Load system information
-        async function loadSystemInfo() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/health`);
-                const data = await response.json();
-                
-                document.getElementById('deviceInfo').textContent = `${data.device.toUpperCase()} • ${data.model}`;
-                document.getElementById('modelInfo').textContent = data.model;
-                document.getElementById('langCount').textContent = data.supported_languages;
-                document.getElementById('statusValue').textContent = data.status === 'healthy' ? 'Online' : 'Offline';
-            } catch (error) {
-                console.error('Failed to load system info:', error);
-                document.getElementById('statusValue').textContent = 'Offline';
-            }
-        }
-
-        // Load languages
+        // Load languages (only once)
         async function loadLanguages() {
             const dropdown = document.getElementById('customSelectDropdown');
             const buttonText = document.getElementById('customSelectText');
@@ -648,56 +515,90 @@
                 return;
             }
 
+            // If languages are already cached, use them
+            if (languagesCache) {
+                buildLanguageDropdown(languagesCache, dropdown, buttonText, hiddenInput);
+                return;
+            }
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/languages`);
                 const data = await response.json();
                 
-                dropdown.innerHTML = '';
+                // Cache the languages
+                languagesCache = data.languages;
                 
-                let isDefaultSet = false;
-
-                data.languages.forEach(lang => {
-                    const optionDiv = document.createElement('div');
-                    optionDiv.classList.add('custom-option');
-                    optionDiv.textContent = lang;
-                    optionDiv.dataset.value = lang;
-                    
-                    optionDiv.addEventListener('click', () => {
-                        hiddenInput.value = lang;
-                        buttonText.textContent = lang;
-                        
-                        document.querySelectorAll('.custom-option').forEach(opt => {
-                            opt.classList.remove('selected');
-                        });
-                        optionDiv.classList.add('selected');
-
-                        dropdown.classList.add('hidden');
-                        document.getElementById('customSelectButton').setAttribute('aria-expanded', 'false');
-                    });
-                    
-                    if (lang === 'English') {
-                        hiddenInput.value = lang;
-                        buttonText.textContent = lang;
-                        optionDiv.classList.add('selected');
-                        isDefaultSet = true;
-                    }
-                    
-                    dropdown.appendChild(optionDiv);
-                });
-
-                if (!isDefaultSet && data.languages.length > 0) {
-                    const firstLang = data.languages[0];
-                    hiddenInput.value = firstLang;
-                    buttonText.textContent = firstLang;
-                    dropdown.children[0].classList.add('selected');
-                } else if (data.languages.length === 0) {
-                    buttonText.textContent = 'No languages loaded';
-                }
+                buildLanguageDropdown(languagesCache, dropdown, buttonText, hiddenInput);
 
             } catch (error) {
                 console.error('Failed to load languages:', error);
                 buttonText.textContent = 'Error loading languages';
             }
+        }
+
+        // Build language dropdown from cached data
+        function buildLanguageDropdown(languages, dropdown, buttonText, hiddenInput) {
+            dropdown.innerHTML = '';
+            
+            let isDefaultSet = false;
+
+            languages.forEach(lang => {
+                const optionDiv = document.createElement('div');
+                optionDiv.classList.add('custom-option');
+                optionDiv.textContent = lang;
+                optionDiv.dataset.value = lang;
+                
+                optionDiv.addEventListener('click', () => {
+                    hiddenInput.value = lang;
+                    buttonText.textContent = lang;
+                    
+                    document.querySelectorAll('.custom-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    optionDiv.classList.add('selected');
+
+                    closeDropdown();
+                });
+                
+                if (lang === 'English') {
+                    hiddenInput.value = lang;
+                    buttonText.textContent = lang;
+                    optionDiv.classList.add('selected');
+                    isDefaultSet = true;
+                }
+                
+                dropdown.appendChild(optionDiv);
+            });
+
+            if (!isDefaultSet && languages.length > 0) {
+                const firstLang = languages[0];
+                hiddenInput.value = firstLang;
+                buttonText.textContent = firstLang;
+                dropdown.children[0].classList.add('selected');
+            } else if (languages.length === 0) {
+                buttonText.textContent = 'No languages loaded';
+            }
+        }
+
+        // Dropdown control functions
+        function openDropdown() {
+            const dropdown = document.getElementById('customSelectDropdown');
+            const button = document.getElementById('customSelectButton');
+            
+            dropdown.classList.remove('dropdown-hidden');
+            dropdown.classList.add('dropdown-visible');
+            button.setAttribute('aria-expanded', 'true');
+            dropdownOpen = true;
+        }
+
+        function closeDropdown() {
+            const dropdown = document.getElementById('customSelectDropdown');
+            const button = document.getElementById('customSelectButton');
+            
+            dropdown.classList.remove('dropdown-visible');
+            dropdown.classList.add('dropdown-hidden');
+            button.setAttribute('aria-expanded', 'false');
+            dropdownOpen = false;
         }
 
         // Setup event listeners
@@ -740,21 +641,24 @@
                 }
             });
             
-            // Custom dropdown
+            // Custom dropdown - improved
             const selectButton = document.getElementById('customSelectButton');
-            const dropdown = document.getElementById('customSelectDropdown');
-            const customSelectWrapper = selectButton.parentElement;
-
-            selectButton.addEventListener('click', () => {
-                const isHidden = dropdown.classList.toggle('hidden');
-                selectButton.setAttribute('aria-expanded', String(!isHidden));
+            
+            selectButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (dropdownOpen) {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
             });
 
             // Close dropdown on outside click
             document.addEventListener('click', (e) => {
-                if (!customSelectWrapper.contains(e.target)) {
-                    dropdown.classList.add('hidden');
-                    selectButton.setAttribute('aria-expanded', 'false');
+                if (dropdownOpen && !selectButton.contains(e.target) && !document.getElementById('customSelectDropdown').contains(e.target)) {
+                    closeDropdown();
                 }
             });
 
