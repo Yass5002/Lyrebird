@@ -5,7 +5,7 @@ colorFrom: purple
 colorTo: blue
 sdk: docker
 pinned: false
-license: cpml
+license: other
 app_port: 7860
 ---
 
