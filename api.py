@@ -13,6 +13,8 @@ from pathlib import Path
 import shutil
 import asyncio
 from datetime import datetime
+import psutil
+import time
 
 # Import core TTS functionality
 from core import (
@@ -46,6 +48,9 @@ app.add_middleware(
 
 # Job storage (use Redis in production for scalability)
 jobs: Dict[str, dict] = {}
+
+# Track server start time
+SERVER_START_TIME = time.time()
 
 # --- Models ---
 class CloneRequest(BaseModel):
@@ -94,6 +99,60 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         **info
     }
+
+# --- Resource Monitoring ---
+@app.get("/api/resources")
+async def get_resources():
+    """Get real-time system resource usage"""
+    try:
+        # CPU usage
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        
+        # RAM usage
+        memory = psutil.virtual_memory()
+        ram_percent = memory.percent
+        ram_used_gb = memory.used / (1024 ** 3)
+        ram_total_gb = memory.total / (1024 ** 3)
+        
+        # Queue count
+        queue_count = len([j for j in jobs.values() if j.get('status') in ['queued', 'processing']])
+        
+        # Uptime
+        uptime_seconds = int(time.time() - SERVER_START_TIME)
+        
+        return {
+            "cpu": {
+                "percent": round(cpu_percent, 1),
+                "cores": psutil.cpu_count()
+            },
+            "ram": {
+                "percent": round(ram_percent, 1),
+                "used_gb": round(ram_used_gb, 2),
+                "total_gb": round(ram_total_gb, 2)
+            },
+            "queue": {
+                "count": queue_count,
+                "jobs": {
+                    "queued": len([j for j in jobs.values() if j.get('status') == 'queued']),
+                    "processing": len([j for j in jobs.values() if j.get('status') == 'processing']),
+                    "completed": len([j for j in jobs.values() if j.get('status') == 'completed']),
+                    "failed": len([j for j in jobs.values() if j.get('status') == 'failed'])
+                }
+            },
+            "uptime": {
+                "seconds": uptime_seconds,
+                "formatted": f"{uptime_seconds // 3600}h {(uptime_seconds % 3600) // 60}m"
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "cpu": {"percent": 0},
+            "ram": {"percent": 0},
+            "queue": {"count": 0},
+            "uptime": {"seconds": 0}
+        }
 
 # --- Language List ---
 @app.get("/api/languages")
