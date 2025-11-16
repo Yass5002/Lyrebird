@@ -55,16 +55,15 @@
 
         .btn-gradient {
             background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
-        .btn-gradient:hover {
+        .btn-gradient:hover:not(:disabled) {
             transform: translateY(-2px);
         }
 
         .btn-gradient:disabled {
             opacity: 0.5;
-            transform: none;
             cursor: not-allowed;
         }
 
@@ -73,7 +72,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             color: white;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .input-glass:focus {
@@ -82,8 +81,18 @@
             outline: none;
         }
 
+        .input-glass:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .input-glass::placeholder {
             color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Info button - Fixed transition */
+        .info-button {
+            transition: background-color 0.3s ease;
         }
 
         /* Custom dropdown styles */
@@ -118,7 +127,7 @@
             color: rgba(255, 255, 255, 0.95);
             border-radius: 0.5rem;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: background-color 0.15s ease;
             font-size: 0.9rem;
         }
 
@@ -156,8 +165,8 @@
         }
 
         .drag-over {
-            background: rgba(139, 92, 246, 0.1) !important;
-            border-color: rgba(139, 92, 246, 0.5) !important;
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.5);
         }
 
         /* Custom audio player range slider */
@@ -169,7 +178,7 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 2px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease;
         }
         input[type="range"]:hover {
              background: rgba(255, 255, 255, 0.2);
@@ -209,6 +218,22 @@
             max-width: 400px;
         }
 
+        /* Success notification */
+        .success-notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(34, 197, 94, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        }
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -218,6 +243,20 @@
                 transform: translateX(0);
                 opacity: 1;
             }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #a78bfa;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -269,9 +308,14 @@
                                     type="button" 
                                     id="customSelectButton"
                                     aria-expanded="false"
+                                    aria-haspopup="listbox"
+                                    aria-labelledby="language-label"
                                     class="input-glass w-full rounded-xl p-4 text-white text-left flex justify-between items-center cursor-pointer"
                                 >
-                                    <span id="customSelectText">Loading languages...</span>
+                                    <span id="customSelectText" class="flex items-center gap-2">
+                                        <span class="spinner"></span>
+                                        Loading languages...
+                                    </span>
                                     <svg id="customSelectArrow" class="w-5 h-5 text-white/40 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
@@ -279,6 +323,7 @@
 
                                 <div 
                                     id="customSelectDropdown"
+                                    role="listbox"
                                     class="dropdown-hidden absolute z-50 w-full mt-2 rounded-xl p-2 max-h-60 overflow-y-auto"
                                 >
                                     <!-- Options will be added by JavaScript -->
@@ -293,7 +338,7 @@
                             </label>
                             <div 
                                 id="fileUpload" 
-                                class="input-glass rounded-xl p-8 text-center cursor-pointer border-2 border-dashed transition-all"
+                                class="input-glass rounded-xl p-8 text-center cursor-pointer border-2 border-dashed transition-colors duration-300"
                             >
                                 <input 
                                     type="file" 
@@ -340,12 +385,16 @@
                     </div>
                 </div>
 
-                <!-- New Sleek Audio Player -->
+                <!-- Audio Player -->
                 <div id="newAudioPlayer" class="hidden glass-strong rounded-3xl p-4">
                     <audio id="audioPlayer" class="hidden"></audio>
                     <div class="flex items-center gap-3">
                         <!-- Play/Pause Button -->
-                        <button id="playBtn" class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center hover:scale-105 transition-transform">
+                        <button 
+                            id="playBtn" 
+                            aria-label="Play/Pause"
+                            class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center hover:scale-105 transition-transform"
+                        >
                             <svg id="playIcon" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
                             </svg>
@@ -356,7 +405,7 @@
                         
                         <!-- Timeline & Time -->
                         <div class="w-full">
-                            <input type="range" id="timeline" class="w-full" value="0" min="0" max="100" step="0.1">
+                            <input type="range" id="timeline" class="w-full" value="0" min="0" max="100" step="0.1" aria-label="Audio timeline">
                             <div class="flex justify-between text-xs text-white/50 mt-1">
                                 <span id="currentTime">0:00</span>
                                 <span id="duration">0:00</span>
@@ -364,7 +413,13 @@
                         </div>
 
                         <!-- Download Button -->
-                        <a id="downloadBtn" href="#" download="lyrebird-voice.wav" class="flex-shrink-0 text-white/50 hover:text-white transition-colors p-2">
+                        <a 
+                            id="downloadBtn" 
+                            href="#" 
+                            download="lyrebird-voice.wav" 
+                            aria-label="Download audio"
+                            class="flex-shrink-0 text-white/50 hover:text-white transition-colors p-2"
+                        >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
@@ -372,10 +427,11 @@
                     </div>
                 </div>
 
-                <!-- Info Button -->
+                <!-- Info Button - FIXED -->
                 <button 
                     onclick="openModal()" 
-                    class="glass w-full rounded-2xl p-6 text-left transition-all hover:bg-white/10"
+                    class="glass info-button w-full rounded-2xl p-6 text-left hover:bg-white/10"
+                    aria-label="How to use guide"
                 >
                     <div class="flex items-center justify-between">
                         <div>
@@ -399,12 +455,12 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-backdrop absolute inset-0" onclick="closeModal()"></div>
         <div class="glass-strong rounded-3xl p-8 max-w-2xl w-full relative z-10 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-white">Quick Start Guide</h2>
-                <button onclick="closeModal()" class="text-white/60 hover:text-white transition-colors">
+                <h2 id="modal-title" class="text-2xl font-bold text-white">Quick Start Guide</h2>
+                <button onclick="closeModal()" aria-label="Close modal" class="text-white/60 hover:text-white transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -459,8 +515,9 @@
     <script>
         let currentJobId = null;
         let pollInterval = null;
-        let languagesCache = null; // Cache languages to avoid refetching
+        let languagesCache = null;
         let dropdownOpen = false;
+        let isProcessing = false;
         
         // API endpoint configuration
         const API_BASE_URL = ""; 
@@ -481,7 +538,7 @@
                 currentJobId = existingJobId;
                 
                 document.getElementById('processingCard').classList.remove('hidden');
-                document.getElementById('submitBtn').disabled = true;
+                setFormDisabled(true);
                 document.getElementById('submitBtn').textContent = 'Reconnecting...';
                 
                 pollJobStatus();
@@ -493,18 +550,36 @@
             }, 50);
         });
 
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+        });
+
         // Modal functions
         function openModal() {
-            document.getElementById('modal').classList.remove('hidden');
-            document.getElementById('modal').classList.add('flex');
+            const modal = document.getElementById('modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-            document.getElementById('modal').classList.remove('flex');
+            const modal = document.getElementById('modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
-        // Load languages (only once)
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !document.getElementById('modal').classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        // Load languages
         async function loadLanguages() {
             const dropdown = document.getElementById('customSelectDropdown');
             const buttonText = document.getElementById('customSelectText');
@@ -523,7 +598,16 @@
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/languages`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: Failed to load languages`);
+                }
+                
                 const data = await response.json();
+                
+                if (!data.languages || !Array.isArray(data.languages)) {
+                    throw new Error('Invalid response format');
+                }
                 
                 // Cache the languages
                 languagesCache = data.languages;
@@ -532,7 +616,8 @@
 
             } catch (error) {
                 console.error('Failed to load languages:', error);
-                buttonText.textContent = 'Error loading languages';
+                buttonText.innerHTML = '<span class="text-red-400">Failed to load languages</span>';
+                showError('Failed to load languages. Please refresh the page.');
             }
         }
 
@@ -540,44 +625,58 @@
         function buildLanguageDropdown(languages, dropdown, buttonText, hiddenInput) {
             dropdown.innerHTML = '';
             
+            if (languages.length === 0) {
+                buttonText.textContent = 'No languages available';
+                return;
+            }
+
             let isDefaultSet = false;
 
-            languages.forEach(lang => {
+            languages.forEach((lang, index) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.classList.add('custom-option');
                 optionDiv.textContent = lang;
                 optionDiv.dataset.value = lang;
+                optionDiv.setAttribute('role', 'option');
+                optionDiv.setAttribute('aria-selected', 'false');
                 
                 optionDiv.addEventListener('click', () => {
-                    hiddenInput.value = lang;
-                    buttonText.textContent = lang;
-                    
-                    document.querySelectorAll('.custom-option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    optionDiv.classList.add('selected');
-
-                    closeDropdown();
+                    selectLanguage(lang, optionDiv, hiddenInput, buttonText);
                 });
                 
+                // Set English as default if available
                 if (lang === 'English') {
-                    hiddenInput.value = lang;
-                    buttonText.textContent = lang;
-                    optionDiv.classList.add('selected');
+                    selectLanguage(lang, optionDiv, hiddenInput, buttonText);
                     isDefaultSet = true;
                 }
                 
                 dropdown.appendChild(optionDiv);
             });
 
-            if (!isDefaultSet && languages.length > 0) {
+            // If English not found, select first language
+            if (!isDefaultSet) {
                 const firstLang = languages[0];
-                hiddenInput.value = firstLang;
-                buttonText.textContent = firstLang;
-                dropdown.children[0].classList.add('selected');
-            } else if (languages.length === 0) {
-                buttonText.textContent = 'No languages loaded';
+                const firstOption = dropdown.children[0];
+                selectLanguage(firstLang, firstOption, hiddenInput, buttonText);
             }
+        }
+
+        // Select language helper
+        function selectLanguage(lang, optionElement, hiddenInput, buttonText) {
+            hiddenInput.value = lang;
+            buttonText.textContent = lang;
+            
+            document.querySelectorAll('.custom-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.setAttribute('aria-selected', 'false');
+            });
+            
+            if (optionElement) {
+                optionElement.classList.add('selected');
+                optionElement.setAttribute('aria-selected', 'true');
+            }
+
+            closeDropdown();
         }
 
         // Dropdown control functions
@@ -613,18 +712,25 @@
             const fileUpload = document.getElementById('fileUpload');
             const fileInput = document.getElementById('audio');
             
-            fileUpload.addEventListener('click', () => fileInput.click());
+            fileUpload.addEventListener('click', () => {
+                if (!isProcessing) {
+                    fileInput.click();
+                }
+            });
             
             fileInput.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
-                    document.getElementById('fileName').textContent = e.target.files[0].name;
+                    const file = e.target.files[0];
+                    document.getElementById('fileName').textContent = file.name;
                 }
             });
 
             // Drag and drop
             fileUpload.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                fileUpload.classList.add('drag-over');
+                if (!isProcessing) {
+                    e.preventDefault();
+                    fileUpload.classList.add('drag-over');
+                }
             });
 
             fileUpload.addEventListener('dragleave', () => {
@@ -632,16 +738,27 @@
             });
 
             fileUpload.addEventListener('drop', (e) => {
-                e.preventDefault();
-                fileUpload.classList.remove('drag-over');
-                
-                if (e.dataTransfer.files.length > 0) {
-                    fileInput.files = e.dataTransfer.files;
-                    document.getElementById('fileName').textContent = e.dataTransfer.files[0].name;
+                if (!isProcessing) {
+                    e.preventDefault();
+                    fileUpload.classList.remove('drag-over');
+                    
+                    if (e.dataTransfer.files.length > 0) {
+                        const file = e.dataTransfer.files[0];
+                        
+                        // Validate file type
+                        const validTypes = ['audio/wav', 'audio/mpeg', 'audio/mp3', 'audio/flac', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
+                        if (!validTypes.includes(file.type) && !file.name.match(/\.(wav|mp3|flac|ogg|m4a)$/i)) {
+                            showError('Invalid file type. Please upload an audio file.');
+                            return;
+                        }
+                        
+                        fileInput.files = e.dataTransfer.files;
+                        document.getElementById('fileName').textContent = file.name;
+                    }
                 }
             });
             
-            // Custom dropdown - improved
+            // Custom dropdown
             const selectButton = document.getElementById('customSelectButton');
             
             selectButton.addEventListener('click', (e) => {
@@ -657,7 +774,22 @@
 
             // Close dropdown on outside click
             document.addEventListener('click', (e) => {
-                if (dropdownOpen && !selectButton.contains(e.target) && !document.getElementById('customSelectDropdown').contains(e.target)) {
+                const dropdown = document.getElementById('customSelectDropdown');
+                if (dropdownOpen && !selectButton.contains(e.target) && !dropdown.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            // Keyboard navigation for dropdown
+            selectButton.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (dropdownOpen) {
+                        closeDropdown();
+                    } else {
+                        openDropdown();
+                    }
+                } else if (e.key === 'Escape' && dropdownOpen) {
                     closeDropdown();
                 }
             });
@@ -666,15 +798,38 @@
             document.getElementById('cloneForm').addEventListener('submit', handleSubmit);
         }
 
+        // Disable/enable form
+        function setFormDisabled(disabled) {
+            isProcessing = disabled;
+            document.getElementById('text').disabled = disabled;
+            document.getElementById('customSelectButton').disabled = disabled;
+            document.getElementById('audio').disabled = disabled;
+            document.getElementById('submitBtn').disabled = disabled;
+            
+            const fileUpload = document.getElementById('fileUpload');
+            if (disabled) {
+                fileUpload.style.opacity = '0.5';
+                fileUpload.style.cursor = 'not-allowed';
+            } else {
+                fileUpload.style.opacity = '1';
+                fileUpload.style.cursor = 'pointer';
+            }
+        }
+
         // Handle form submission
         async function handleSubmit(e) {
             e.preventDefault();
+            
+            // Prevent double submission
+            if (isProcessing) {
+                return;
+            }
             
             const formData = new FormData(e.target);
             const submitBtn = document.getElementById('submitBtn');
             const customSelectButton = document.getElementById('customSelectButton');
 
-            // Check language selection
+            // Validate language selection
             const languageValue = document.getElementById('language').value;
             if (!languageValue) {
                 customSelectButton.classList.add('border-red-500', 'border-2');
@@ -684,12 +839,19 @@
             } else {
                 customSelectButton.classList.remove('border-red-500', 'border-2');
             }
+
+            // Validate file
+            const audioFile = document.getElementById('audio').files[0];
+            if (!audioFile) {
+                showError('Please upload an audio file');
+                return;
+            }
             
             // Show processing card
             document.getElementById('processingCard').classList.remove('hidden');
             document.getElementById('newAudioPlayer').classList.add('hidden');
             
-            submitBtn.disabled = true;
+            setFormDisabled(true);
             submitBtn.textContent = 'Processing...';
             
             updateProgress(0.1, 'Uploading and initializing...');
@@ -701,8 +863,14 @@
                 });
                 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.detail || 'Failed to submit job');
+                    let errorMessage = 'Failed to submit job';
+                    try {
+                        const error = await response.json();
+                        errorMessage = error.detail || error.message || errorMessage;
+                    } catch (e) {
+                        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
                 }
                 
                 const data = await response.json();
@@ -714,7 +882,9 @@
                 pollJobStatus();
                 
             } catch (error) {
+                console.error('Submission error:', error);
                 showError(error.message);
+                resetForm();
             }
         }
 
@@ -745,12 +915,15 @@
                         clearInterval(pollInterval);
                         localStorage.removeItem('active_lyrebird_job');
                         showError(data.error || 'Processing failed');
+                        resetForm();
                     }
                     
                 } catch (error) {
+                    console.error('Polling error:', error);
                     clearInterval(pollInterval);
                     localStorage.removeItem('active_lyrebird_job');
                     showError('Failed to check job status: ' + error.message);
+                    resetForm();
                 }
             }, 1000);
         }
@@ -760,7 +933,7 @@
             const progressFillOutput = document.getElementById('progressFillOutput');
             const progressTextOutput = document.getElementById('progressTextOutput');
             
-            const percent = Math.round(progress * 100);
+            const percent = Math.min(Math.round(progress * 100), 100);
             
             if (progressFillOutput) progressFillOutput.style.width = percent + '%';
             if (progressTextOutput) progressTextOutput.textContent = message;
@@ -768,8 +941,6 @@
 
         // Show success result
         function showSuccess(data) {
-            const submitBtn = document.getElementById('submitBtn');
-            
             // Hide processing, show player
             document.getElementById('processingCard').classList.add('hidden');
             document.getElementById('newAudioPlayer').classList.remove('hidden');
@@ -782,32 +953,40 @@
             // Setup audio controls
             setupNewAudioControls();
             
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Generate Voice';
+            // Reset form
+            resetForm();
+            
+            // Show success notification
+            showNotification('Voice generated successfully!', 'success');
         }
 
-        // Show error notification
-        function showError(message) {
+        // Reset form to initial state
+        function resetForm() {
+            setFormDisabled(false);
             const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Generate Voice';
+            currentJobId = null;
+        }
+
+        // Show notification
+        function showNotification(message, type = 'error') {
+            const notificationClass = type === 'success' ? 'success-notification' : 'error-notification';
+            const iconPath = type === 'success' 
+                ? 'M5 13l4 4L19 7' 
+                : 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
             
-            console.error("Lyrebird Error:", message);
-            
-            // Hide processing card
-            document.getElementById('processingCard').classList.add('hidden');
-            
-            // Create error notification
             const notification = document.createElement('div');
-            notification.className = 'error-notification';
+            notification.className = notificationClass;
             notification.innerHTML = `
                 <div class="flex items-start gap-3">
                     <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}" />
                     </svg>
                     <div class="flex-1">
-                        <p class="font-semibold mb-1">Error</p>
+                        <p class="font-semibold mb-1">${type === 'success' ? 'Success' : 'Error'}</p>
                         <p class="text-sm opacity-90">${message}</p>
                     </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-white/80 hover:text-white">
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-white/80 hover:text-white" aria-label="Close notification">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -823,9 +1002,16 @@
                     notification.remove();
                 }
             }, 5000);
+        }
+
+        // Show error notification
+        function showError(message) {
+            console.error("Lyrebird Error:", message);
             
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Generate Voice';
+            // Hide processing card
+            document.getElementById('processingCard').classList.add('hidden');
+            
+            showNotification(message, 'error');
         }
 
         // Setup audio player controls
@@ -840,6 +1026,7 @@
 
             // Format time helper
             function formatTime(seconds) {
+                if (!isFinite(seconds)) return '0:00';
                 const mins = Math.floor(seconds / 60);
                 const secs = Math.floor(seconds % 60);
                 return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -848,7 +1035,10 @@
             // Play/Pause
             playBtn.onclick = () => {
                 if (audio.paused) {
-                    audio.play();
+                    audio.play().catch(err => {
+                        console.error('Playback error:', err);
+                        showError('Failed to play audio');
+                    });
                 } else {
                     audio.pause();
                 }
@@ -867,7 +1057,7 @@
             // Update timeline as audio plays
             audio.ontimeupdate = () => {
                 currentTimeSpan.textContent = formatTime(audio.currentTime);
-                if (audio.duration) {
+                if (audio.duration && isFinite(audio.duration)) {
                     timeline.value = (audio.currentTime / audio.duration) * 100;
                 }
             };
@@ -880,7 +1070,7 @@
 
             // Click on timeline to seek
             timeline.oninput = () => {
-                if (audio.duration) {
+                if (audio.duration && isFinite(audio.duration)) {
                     audio.currentTime = (timeline.value / 100) * audio.duration;
                 }
             };
@@ -891,6 +1081,11 @@
                 pauseIcon.classList.add('hidden');
                 timeline.value = 0;
                 audio.currentTime = 0;
+            };
+
+            // Error handling
+            audio.onerror = () => {
+                showError('Failed to load audio file');
             };
         }
     </script>
