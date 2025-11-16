@@ -12,10 +12,14 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Remove all box-shadows globally */
+        *, *::before, *::after {
+            box-shadow: none !important;
+        }
+
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
             background-attachment: fixed;
-            box-shadow: none !important;
             margin: 0;
             padding: 0;
         }
@@ -24,16 +28,12 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            transform: translateZ(0);
         }
 
         .glass-strong {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            transform: translateZ(0);
         }
 
         .gradient-text {
@@ -50,7 +50,6 @@
 
         .btn-gradient:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
         }
 
         .btn-gradient:disabled {
@@ -65,54 +64,38 @@
             backdrop-filter: blur(10px);
             color: white;
             transition: all 0.3s ease;
-            box-shadow: none !important;
         }
 
         .input-glass:focus {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(167, 139, 250, 0.5);
             outline: none;
-            box-shadow: none !important;
         }
 
         .input-glass::placeholder {
             color: rgba(255, 255, 255, 0.4);
         }
 
-        /* --- REMOVED OLD DROPDOWN FIX --- */
-        /* The old select.input-glass styles are gone */
-        
-        /* --- NEW CUSTOM DROPDOWN STYLES --- */
-        
-        /* Style for the button to match other inputs */
-        #customSelectButton {
-            box-shadow: none !important;
-        }
-        
+        /* Custom dropdown styles */
         #customSelectButton:focus {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(167, 139, 250, 0.5);
             outline: none;
-            box-shadow: none !important;
         }
 
-        /* Style for the dropdown panel */
         #customSelectDropdown {
-            background: rgba(30, 27, 75, 0.85); /* Dark semi-transparent background */
+            background: rgba(30, 27, 75, 0.85);
             backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.6);
-            /* Add noise texture for glass effect */
             background-image: 
                 linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%),
                 repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, transparent 1px, transparent 2px, rgba(255, 255, 255, 0.03) 3px);
         }
 
-        /* Style for individual options */
         .custom-option {
             padding: 0.75rem 1rem;
-            color: rgba(255, 255, 255, 0.95); /* White text on dark glass */
-            border-radius: 0.75rem; /* Rounded corners for options */
+            color: rgba(255, 255, 255, 0.95);
+            border-radius: 0.75rem;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
             font-size: 0.9rem;
@@ -124,12 +107,11 @@
         }
         
         .custom-option.selected {
-            background: rgba(167, 139, 250, 0.4); /* Highlight for selected */
+            background: rgba(167, 139, 250, 0.4);
             font-weight: 500;
             color: rgba(255, 255, 255, 1);
         }
 
-        /* Custom scrollbar for the dropdown */
         #customSelectDropdown::-webkit-scrollbar {
             width: 8px;
         }
@@ -145,12 +127,9 @@
             background: rgba(167, 139, 250, 0.7);
         }
 
-        /* Arrow rotation */
         #customSelectButton[aria-expanded="true"] #customSelectArrow {
             transform: rotate(180deg);
         }
-        /* --- END OF CUSTOM DROPDOWN STYLES --- */
-
 
         .modal-backdrop {
             background: rgba(0, 0, 0, 0.7);
@@ -188,7 +167,7 @@
             border-color: rgba(139, 92, 246, 0.5) !important;
         }
 
-        /* Custom styles for the new audio player */
+        /* Custom audio player range slider */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -219,6 +198,33 @@
             border-radius: 50%;
             cursor: pointer;
             border: none;
+        }
+
+        /* Error notification */
+        .error-notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(239, 68, 68, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            color: white;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -309,12 +315,10 @@
                                 Output Language
                             </label>
                             
-                            <!-- === CUSTOM SELECT REPLACEMENT === -->
+                            <!-- Custom Select Replacement -->
                             <div class="relative">
-                                <!-- Hidden input to store the value for the form -->
                                 <input type="hidden" id="language" name="language" required>
 
-                                <!-- This is the button that looks like an input -->
                                 <button 
                                     type="button" 
                                     id="customSelectButton"
@@ -322,13 +326,11 @@
                                     class="input-glass w-full rounded-xl p-4 text-white text-left flex justify-between items-center cursor-pointer"
                                 >
                                     <span id="customSelectText">Loading languages...</span>
-                                    <!-- Custom SVG arrow -->
                                     <svg id="customSelectArrow" class="w-5 h-5 text-white/40 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
 
-                                <!-- This is the dropdown panel -->
                                 <div 
                                     id="customSelectDropdown"
                                     class="hidden absolute z-50 w-full mt-2 rounded-xl p-2 max-h-60 overflow-y-auto"
@@ -336,7 +338,6 @@
                                     <!-- Options will be added by JavaScript -->
                                 </div>
                             </div>
-                            <!-- === END OF CUSTOM SELECT === -->
                         </div>
 
                         <!-- File Upload -->
@@ -371,28 +372,18 @@
                         <button 
                             type="submit" 
                             id="submitBtn"
-                            class="btn-gradient w-full py-4 rounded-xl text-white font-semibold text-lg shadow-lg"
+                            class="btn-gradient w-full py-4 rounded-xl text-white font-semibold text-lg"
                         >
                             Generate Voice
                         </button>
                     </form>
-
-                    <!-- 
-                        TASK 1: REDUNDANT PROGRESS BAR REMOVED
-                    -->
                 </div>
             </div>
 
             <!-- Sidebar -->
             <div class="lg:col-span-1 space-y-6">
 
-                <!-- 
-                  TASK 2: REPLACED PLAYER
-                  The old "outputCard" is gone.
-                  It is replaced by these two new cards:
-                -->
-
-                <!-- 1. Processing Card (This will show in the sidebar) -->
+                <!-- Processing Card -->
                 <div id="processingCard" class="hidden glass-strong rounded-3xl p-6 fade-in" style="animation-delay: 0.3s">
                     <h3 class="text-white font-semibold text-lg mb-4">Processing</h3>
                     <div class="space-y-3">
@@ -403,12 +394,12 @@
                     </div>
                 </div>
 
-                <!-- 2. New Sleek Audio Player (Hidden by default) -->
+                <!-- New Sleek Audio Player -->
                 <div id="newAudioPlayer" class="hidden glass-strong rounded-3xl p-4 fade-in">
                     <audio id="audioPlayer" class="hidden"></audio>
                     <div class="flex items-center gap-3">
                         <!-- Play/Pause Button -->
-                        <button id="playBtn" class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center hover:scale-105 transition-transform shadow-lg">
+                        <button id="playBtn" class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center hover:scale-105 transition-transform">
                             <svg id="playIcon" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
                             </svg>
@@ -545,13 +536,8 @@
         let resourceInterval = null;
         let uptimeStart = Date.now();
         
-        // <!-- ### API ENDPOINT ### -->
-        // <!-- This is the URL of your Hugging Face Space API -->
-        // const API_BASE_URL = "https://yassineai01-lyrebird.hf.space"; 
-        
-        // <!-- Using relative paths for local development -->
+        // API endpoint configuration
         const API_BASE_URL = ""; 
-
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -562,15 +548,13 @@
                 console.log('Found existing job:', existingJobId);
                 currentJobId = existingJobId;
                 
-                // Show the processing card
                 document.getElementById('processingCard').classList.remove('hidden');
                 document.getElementById('submitBtn').disabled = true;
                 document.getElementById('submitBtn').textContent = 'Reconnecting...';
                 
-                pollJobStatus(); // Start polling for this old job
+                pollJobStatus();
             }
 
-            // Load initial data
             await loadSystemInfo();
             await loadLanguages();
             setupEventListeners();
@@ -598,15 +582,14 @@
             document.getElementById('uptime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // ### CONTAINER RESOURCE MONITORING ###        
+        // Resource monitoring
         async function startResourceMonitoring() {
             updateResources();
-            resourceInterval = setInterval(updateResources, 2000); // Update every 2 seconds
+            resourceInterval = setInterval(updateResources, 2000);
         }
 
         async function updateResources() {
             try {
-                // Get real container resource data from API
                 const response = await fetch(`${API_BASE_URL}/api/resources`);
                 const data = await response.json();
                 
@@ -615,12 +598,12 @@
                     return;
                 }
 
-                // Update CPU (direct values from container)
+                // Update CPU
                 const cpu = data.cpu.percent;
                 document.getElementById('cpuValue').textContent = cpu + '%';
                 document.getElementById('cpuBar').style.width = cpu + '%';
                 
-                // Update RAM (direct values from container)
+                // Update RAM
                 const ram = data.ram.percent;
                 document.getElementById('ramValue').textContent = ram + '%';
                 document.getElementById('ramBar').style.width = ram + '%';
@@ -630,7 +613,6 @@
                 document.getElementById('queueValue').textContent = queue;
                 document.getElementById('queueBar').style.width = Math.min(queue * 20, 100) + '%';
                 
-                // Log container status
                 if (data.container !== undefined) {
                     console.log('Running in container:', data.container);
                 }
@@ -638,10 +620,8 @@
                 console.error('Resource monitoring error:', error);
             }
         }
-        // ### END OF RESOURCE MONITORING ###
 
-
-        // ### TASK 3: UNTOUCHED LANGUAGE LOGIC ###
+        // Load system information
         async function loadSystemInfo() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/health`);
@@ -651,15 +631,14 @@
                 document.getElementById('modelInfo').textContent = data.model;
                 document.getElementById('langCount').textContent = data.supported_languages;
                 document.getElementById('statusValue').textContent = data.status === 'healthy' ? 'Online' : 'Offline';
-            } catch (error)
- {
+            } catch (error) {
                 console.error('Failed to load system info:', error);
                 document.getElementById('statusValue').textContent = 'Offline';
             }
         }
 
+        // Load languages
         async function loadLanguages() {
-            // === NEW LOGIC FOR CUSTOM DROPDOWN ===
             const dropdown = document.getElementById('customSelectDropdown');
             const buttonText = document.getElementById('customSelectText');
             const hiddenInput = document.getElementById('language');
@@ -673,7 +652,7 @@
                 const response = await fetch(`${API_BASE_URL}/api/languages`);
                 const data = await response.json();
                 
-                dropdown.innerHTML = ''; // Clear loading state
+                dropdown.innerHTML = '';
                 
                 let isDefaultSet = false;
 
@@ -684,17 +663,14 @@
                     optionDiv.dataset.value = lang;
                     
                     optionDiv.addEventListener('click', () => {
-                        // Set value
                         hiddenInput.value = lang;
                         buttonText.textContent = lang;
                         
-                        // Update selected visual state
                         document.querySelectorAll('.custom-option').forEach(opt => {
                             opt.classList.remove('selected');
                         });
                         optionDiv.classList.add('selected');
 
-                        // Close dropdown
                         dropdown.classList.add('hidden');
                         document.getElementById('customSelectButton').setAttribute('aria-expanded', 'false');
                     });
@@ -710,7 +686,6 @@
                 });
 
                 if (!isDefaultSet && data.languages.length > 0) {
-                    // If 'English' not found, set first lang as default
                     const firstLang = data.languages[0];
                     hiddenInput.value = firstLang;
                     buttonText.textContent = firstLang;
@@ -723,9 +698,7 @@
                 console.error('Failed to load languages:', error);
                 buttonText.textContent = 'Error loading languages';
             }
-            // === END OF NEW LOGIC ===
         }
-        // ### END OF UNTOUCHED LOGIC ###
 
         // Setup event listeners
         function setupEventListeners() {
@@ -767,25 +740,23 @@
                 }
             });
             
-            // === NEW LOGIC FOR CUSTOM DROPDOWN ===
+            // Custom dropdown
             const selectButton = document.getElementById('customSelectButton');
             const dropdown = document.getElementById('customSelectDropdown');
-            const customSelectWrapper = selectButton.parentElement; // This is the <div class="relative">
+            const customSelectWrapper = selectButton.parentElement;
 
             selectButton.addEventListener('click', () => {
                 const isHidden = dropdown.classList.toggle('hidden');
                 selectButton.setAttribute('aria-expanded', String(!isHidden));
             });
 
-            // Global click listener to close dropdown
+            // Close dropdown on outside click
             document.addEventListener('click', (e) => {
-                // Check if the click is outside the custom select wrapper
                 if (!customSelectWrapper.contains(e.target)) {
                     dropdown.classList.add('hidden');
                     selectButton.setAttribute('aria-expanded', 'false');
                 }
             });
-            // === END OF NEW LOGIC ===
 
             // Form submission
             document.getElementById('cloneForm').addEventListener('submit', handleSubmit);
@@ -799,23 +770,19 @@
             const submitBtn = document.getElementById('submitBtn');
             const customSelectButton = document.getElementById('customSelectButton');
 
-            // === NEW: Check custom select value ===
+            // Check language selection
             const languageValue = document.getElementById('language').value;
             if (!languageValue) {
-                console.error("No language selected");
-                // Add an error state
-                customSelectButton.classList.add('border-red-500', 'border-2'); // Add red border
-                customSelectButton.focus(); // Bring attention to it
-                return; // Stop submission
+                customSelectButton.classList.add('border-red-500', 'border-2');
+                customSelectButton.focus();
+                showError('Please select a language');
+                return;
             } else {
-                // Clear error state if any
                 customSelectButton.classList.remove('border-red-500', 'border-2');
             }
-            // === END OF CHECK ===
             
-            // Show new processing card
+            // Show processing card
             document.getElementById('processingCard').classList.remove('hidden');
-            // Hide the new player card if it was visible
             document.getElementById('newAudioPlayer').classList.add('hidden');
             
             submitBtn.disabled = true;
@@ -837,7 +804,6 @@
                 const data = await response.json();
                 currentJobId = data.job_id;
                 
-                // Save to localStorage
                 localStorage.setItem('active_lyrebird_job', currentJobId);
                 
                 updateProgress(0.2, 'Job queued, starting processing...');
@@ -869,17 +835,17 @@
                     
                     if (data.status === 'completed') {
                         clearInterval(pollInterval);
-                        localStorage.removeItem('active_lyrebird_job'); // Clear job on success
+                        localStorage.removeItem('active_lyrebird_job');
                         showSuccess(data);
                     } else if (data.status === 'failed') {
                         clearInterval(pollInterval);
-                        localStorage.removeItem('active_lyrebird_job'); // Clear job on fail
+                        localStorage.removeItem('active_lyrebird_job');
                         showError(data.error || 'Processing failed');
                     }
                     
                 } catch (error) {
                     clearInterval(pollInterval);
-                    localStorage.removeItem('active_lyrebird_job'); // Clear job on error
+                    localStorage.removeItem('active_lyrebird_job');
                     showError('Failed to check job status: ' + error.message);
                 }
             }, 1000);
@@ -887,7 +853,6 @@
 
         // Update progress bar
         function updateProgress(progress, message) {
-            // TASK 1: This now *only* updates the bar in the sidebar
             const progressFillOutput = document.getElementById('progressFillOutput');
             const progressTextOutput = document.getElementById('progressTextOutput');
             
@@ -901,11 +866,11 @@
         function showSuccess(data) {
             const submitBtn = document.getElementById('submitBtn');
             
-            // TASK 2: Hide processing, show new player
+            // Hide processing, show player
             document.getElementById('processingCard').classList.add('hidden');
             document.getElementById('newAudioPlayer').classList.remove('hidden');
             
-            // Set audio source for player and download
+            // Set audio source
             const audioUrl = API_BASE_URL + data.audio_url;
             document.getElementById('audioPlayer').src = audioUrl;
             document.getElementById('downloadBtn').href = audioUrl;
@@ -917,7 +882,7 @@
             submitBtn.textContent = 'Generate Voice';
         }
 
-        // Show error
+        // Show error notification
         function showError(message) {
             const submitBtn = document.getElementById('submitBtn');
             
@@ -926,16 +891,40 @@
             // Hide processing card
             document.getElementById('processingCard').classList.add('hidden');
             
-            // Replaced the default alert with a custom modal if you had one,
-            // but for simplicity, alert() is used here as in your original.
-            // A proper implementation would be to create a custom error modal.
-            alert("Error: " + message); 
+            // Create error notification
+            const notification = document.createElement('div');
+            notification.className = 'error-notification';
+            notification.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="flex-1">
+                        <p class="font-semibold mb-1">Error</p>
+                        <p class="text-sm opacity-90">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-white/80 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
             
             submitBtn.disabled = false;
             submitBtn.textContent = 'Generate Voice';
         }
 
-        // ### TASK 2: NEW AUDIO PLAYER LOGIC ###
+        // Setup audio player controls
         function setupNewAudioControls() {
             const audio = document.getElementById('audioPlayer');
             const playBtn = document.getElementById('playBtn');
@@ -960,10 +949,12 @@
                     audio.pause();
                 }
             };
+            
             audio.onplay = () => {
                 playIcon.classList.add('hidden');
                 pauseIcon.classList.remove('hidden');
             };
+            
             audio.onpause = () => {
                 playIcon.classList.remove('hidden');
                 pauseIcon.classList.add('hidden');
