@@ -1,0 +1,19 @@
+# Core dependencies
+torch==2.2.2
+torchvision==0.17.2
+transformers==4.49.0
+TTS
+
+# FastAPI and web server
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Audio processing
+pydub
+
+# Punctuation restoration (optional but recommended)
+deepmultilingualpunctuation
+
+# Additional utilities
+aiofiles

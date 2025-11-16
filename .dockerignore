@@ -1,0 +1,48 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Notebooks
+*.ipynb
+.ipynb_checkpoints/
+setup.ipynb
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+temp_audio/*
+outputs/*
+voice_cloning_outputs/*
+
+# Keep directories but not contents
+!temp_audio/.gitkeep
+!outputs/.gitkeep
+
+# Logs
+*.log
+api.log
+
+# Model cache (will be downloaded on first run)
+.cache/
+
+# Documentation
+README.md
+scripts/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙️ XTTS Voice Cloning Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 5px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload {
+            border: 3px dashed #e0e0e0;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .file-upload.drag-over {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            text-align: center;
+            color: #666;
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .result.success {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .result.error {
+            border-color: #dc3545;
+            background: #fff0f0;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .status-message {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .system-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-card strong {
+            display: block;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .accordion {
+            margin: 20px 0;
+        }
+
+        .accordion-header {
+            background: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 0 0 8px 8px;
+            margin-top: -8px;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ XTTS Voice Cloning Studio</h1>
+            <p>High-Quality Multilingual Voice Cloning</p>
+        </header>
+
+        <div class="warning">
+            ⚠️ <strong>For personal/research use only</strong> - Always obtain consent before cloning voices!
+        </div>
+
+        <div class="content">
+            <!-- System Info -->
+            <div class="system-info" id="systemInfo">
+                <div class="info-card">
+                    <strong>Device</strong>
+                    <span id="device">Loading...</span>
+                </div>
+                <div class="info-card">
+                    <strong>Languages</strong>
+                    <span id="languageCount">Loading...</span>
+                </div>
+                <div class="info-card">
+                    <strong>Model</strong>
+                    <span id="model">Loading...</span>
+                </div>
+            </div>
+
+            <!-- How to Use -->
+            <div class="accordion">
+                <div class="accordion-header" onclick="toggleAccordion()">
+                    <span>📋 How to Use</span>
+                    <span id="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content" id="accordionContent">
+                    <h3>Quick Start</h3>
+                    <ol>
+                        <li><strong>Upload Audio:</strong> 5-15 seconds of clean, clear speech</li>
+                        <li><strong>Enter Text:</strong> Type naturally - punctuation is added automatically</li>
+                        <li><strong>Select Language:</strong> Choose from 17 languages</li>
+                        <li><strong>Generate:</strong> Click and wait for your cloned voice</li>
+                    </ol>
+                    
+                    <h3>Tips for Best Results</h3>
+                    <ul>
+                        <li>Use high-quality reference audio (no background noise)</li>
+                        <li>Single speaker only in reference audio</li>
+                        <li>Clear pronunciation in reference</li>
+                        <li>Reference audio: 5-15 seconds is optimal</li>
+                        <li>Supported formats: WAV, MP3, FLAC, OGG, M4A</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Form -->
+            <form id="cloneForm">
+                <div class="form-group">
+                    <label for="text">Text to Speak</label>
+                    <textarea 
+                        id="text" 
+                        name="text" 
+                        placeholder="Enter your text here...&#10;&#10;You can type naturally - punctuation will be added automatically for natural-sounding speech."
+                        required
+                        maxlength="2000"
+                    ></textarea>
+                    <small style="color: #999;">Characters: <span id="charCount">0</span> / 2000</small>
+                </div>
+
+                <div class="form-group">
+                    <label>🎤 Voice Reference Audio</label>
+                    <div class="file-upload" id="fileUpload">
+                        <input 
+                            type="file" 
+                            id="audio" 
+                            name="audio" 
+                            accept="audio/*"
+                            style="display: none;"
+                            required
+                        >
+                        <div>📁 Click or drag to upload audio file</div>
+                        <div class="file-name" id="fileName"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="language">🌐 Output Language</label>
+                    <select id="language" name="language" required>
+                        <option value="">Loading languages...</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="submitBtn">
+                    🎬 Generate Voice Clone
+                </button>
+            </form>
+
+            <!-- Progress -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+
+            <!-- Result -->
+            <div class="result" id="result">
+                <h3 id="resultTitle">Result</h3>
+                <div class="status-message" id="statusMessage"></div>
+                <audio id="audioPlayer" controls></audio>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>🤖 Model:</strong> XTTS v2 | <strong>⚡ Device:</strong> <span id="footerDevice">-</span></p>
+
+        </footer>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        let pollInterval = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSystemInfo();
+            await loadLanguages();
+            setupEventListeners();
+        });
+
+        // Load system info
+        async function loadSystemInfo() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                document.getElementById('device').textContent = data.device.toUpperCase();
+                document.getElementById('languageCount').textContent = data.supported_languages;
+                document.getElementById('model').textContent = data.model;
+                document.getElementById('footerDevice').textContent = data.device.toUpperCase();
+            } catch (error) {
+                console.error('Failed to load system info:', error);
+            }
+        }
+
+        // Load languages
+        async function loadLanguages() {
+            try {
+                const response = await fetch('/api/languages');
+                const data = await response.json();
+                
+                const select = document.getElementById('language');
+                select.innerHTML = '';
+                
+                data.languages.forEach(lang => {
+                    const option = document.createElement('option');
+                    option.value = lang;
+                    option.textContent = lang;
+                    if (lang === 'English') option.selected = true;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load languages:', error);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Character counter
+            const textArea = document.getElementById('text');
+            textArea.addEventListener('input', () => {
+                document.getElementById('charCount').textContent = textArea.value.length;
+            });
+
+            // File upload
+            const fileUpload = document.getElementById('fileUpload');
+            const fileInput = document.getElementById('audio');
+            
+            fileUpload.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    document.getElementById('fileName').textContent = e.target.files[0].name;
+                }
+            });
+
+            // Drag and drop
+            fileUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUpload.classList.add('drag-over');
+            });
+
+            fileUpload.addEventListener('dragleave', () => {
+                fileUpload.classList.remove('drag-over');
+            });
+
+            fileUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUpload.classList.remove('drag-over');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    document.getElementById('fileName').textContent = e.dataTransfer.files[0].name;
+                }
+            });
+
+            // Form submission
+            document.getElementById('cloneForm').addEventListener('submit', handleSubmit);
+        }
+
+        // Handle form submission
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            
+            // Hide previous result
+            resultDiv.style.display = 'none';
+            
+            // Show progress
+            document.getElementById('progressContainer').style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Processing...';
+            
+            updateProgress(0.1, 'Uploading and initializing...');
+            
+            try {
+                // Submit async job
+                const response = await fetch('/api/clone/async', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to submit job');
+                }
+                
+                const data = await response.json();
+                currentJobId = data.job_id;
+                
+                updateProgress(0.2, 'Job queued, starting processing...');
+                
+                // Start polling for status
+                pollJobStatus();
+                
+            } catch (error) {
+                showError(error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🎬 Generate Voice Clone';
+                document.getElementById('progressContainer').style.display = 'none';
+            }
+        }
+
+        // Poll job status
+        function pollJobStatus() {
+            if (pollInterval) clearInterval(pollInterval);
+            
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/jobs/${currentJobId}`);
+                    const data = await response.json();
+                    
+                    // Update progress
+                    updateProgress(data.progress, data.message || data.status);
+                    
+                    // Check if completed
+                    if (data.status === 'completed') {
+                        clearInterval(pollInterval);
+                        showSuccess(data);
+                    } else if (data.status === 'failed') {
+                        clearInterval(pollInterval);
+                        showError(data.error || 'Processing failed');
+                    }
+                    
+                } catch (error) {
+                    clearInterval(pollInterval);
+                    showError('Failed to check job status');
+                }
+            }, 1000); // Poll every second
+        }
+
+        // Update progress bar
+        function updateProgress(progress, message) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            const percent = Math.round(progress * 100);
+            progressFill.style.width = percent + '%';
+            progressFill.textContent = percent + '%';
+            progressText.textContent = message;
+        }
+
+        // Show success result
+        function showSuccess(data) {
+            const resultDiv = document.getElementById('result');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            resultDiv.className = 'result success';
+            resultDiv.style.display = 'block';
+            document.getElementById('resultTitle').textContent = '✅ Success!';
+            document.getElementById('statusMessage').textContent = data.message || 'Voice cloning completed!';
+            
+            audioPlayer.src = data.audio_url;
+            audioPlayer.style.display = 'block';
+            
+            document.getElementById('progressContainer').style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🎬 Generate Voice Clone';
+        }
+
+        // Show error
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            resultDiv.className = 'result error';
+            resultDiv.style.display = 'block';
+            document.getElementById('resultTitle').textContent = '❌ Error';
+            document.getElementById('statusMessage').textContent = message;
+            
+            audioPlayer.style.display = 'none';
+            
+            document.getElementById('progressContainer').style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.textContent = '🎬 Generate Voice Clone';
+        }
+
+        // Toggle accordion
+        function toggleAccordion() {
+            const content = document.getElementById('accordionContent');
+            const icon = document.getElementById('accordion-icon');
+            
+            content.classList.toggle('active');
+            icon.textContent = content.classList.contains('active') ? '▲' : '▼';
+        }
+    </script>
+</body>
+</html>
