@@ -103,16 +103,96 @@ async def health_check():
 # --- Resource Monitoring ---
 @app.get("/api/resources")
 async def get_resources():
-    """Get real-time system resource usage"""
+    """Get real-time container resource usage"""
     try:
-        # CPU usage
-        cpu_percent = psutil.cpu_percent(interval=0.1)
+        # Try to read Docker container limits first
+        cpu_percent = 0
+        ram_percent = 0
+        ram_used_gb = 0
+        ram_total_gb = 0
         
-        # RAM usage
-        memory = psutil.virtual_memory()
-        ram_percent = memory.percent
-        ram_used_gb = memory.used / (1024 ** 3)
-        ram_total_gb = memory.total / (1024 ** 3)
+        # Check if running in Docker container
+        is_docker = Path("/sys/fs/cgroup/memory/memory.limit_in_bytes").exists() or \
+                    Path("/sys/fs/cgroup/memory.max").exists()
+        
+        if is_docker:
+            # Docker container - read cgroup stats
+            try:
+                # CPU usage (cgroup v1 or v2)
+                cpu_stat_v1 = Path("/sys/fs/cgroup/cpu/cpuacct.usage")
+                cpu_stat_v2 = Path("/sys/fs/cgroup/cpu.stat")
+                
+                if cpu_stat_v1.exists():
+                    # Simple fallback: use psutil but it's container-aware in Docker
+                    cpu_percent = psutil.cpu_percent(interval=0.1)
+                elif cpu_stat_v2.exists():
+                    cpu_percent = psutil.cpu_percent(interval=0.1)
+                else:
+                    cpu_percent = psutil.cpu_percent(interval=0.1)
+                
+                # Memory usage (cgroup v1)
+                mem_limit_v1 = Path("/sys/fs/cgroup/memory/memory.limit_in_bytes")
+                mem_usage_v1 = Path("/sys/fs/cgroup/memory/memory.usage_in_bytes")
+                
+                # Memory usage (cgroup v2)
+                mem_limit_v2 = Path("/sys/fs/cgroup/memory.max")
+                mem_usage_v2 = Path("/sys/fs/cgroup/memory.current")
+                
+                if mem_limit_v1.exists() and mem_usage_v1.exists():
+                    # cgroup v1
+                    limit = int(mem_limit_v1.read_text().strip())
+                    usage = int(mem_usage_v1.read_text().strip())
+                    
+                    # Check if limit is not set to max
+                    if limit < 9223372036854771712:  # Not unlimited
+                        ram_total_gb = limit / (1024 ** 3)
+                        ram_used_gb = usage / (1024 ** 3)
+                        ram_percent = (usage / limit) * 100
+                    else:
+                        # Fallback to system memory
+                        memory = psutil.virtual_memory()
+                        ram_percent = memory.percent
+                        ram_used_gb = memory.used / (1024 ** 3)
+                        ram_total_gb = memory.total / (1024 ** 3)
+                        
+                elif mem_limit_v2.exists() and mem_usage_v2.exists():
+                    # cgroup v2
+                    limit_str = mem_limit_v2.read_text().strip()
+                    usage = int(mem_usage_v2.read_text().strip())
+                    
+                    if limit_str != "max":
+                        limit = int(limit_str)
+                        ram_total_gb = limit / (1024 ** 3)
+                        ram_used_gb = usage / (1024 ** 3)
+                        ram_percent = (usage / limit) * 100
+                    else:
+                        # Fallback to system memory
+                        memory = psutil.virtual_memory()
+                        ram_percent = memory.percent
+                        ram_used_gb = memory.used / (1024 ** 3)
+                        ram_total_gb = memory.total / (1024 ** 3)
+                else:
+                    # Fallback to system memory
+                    memory = psutil.virtual_memory()
+                    ram_percent = memory.percent
+                    ram_used_gb = memory.used / (1024 ** 3)
+                    ram_total_gb = memory.total / (1024 ** 3)
+                    
+            except Exception as e:
+                print(f"Error reading cgroup stats: {e}")
+                # Fallback to system stats
+                cpu_percent = psutil.cpu_percent(interval=0.1)
+                memory = psutil.virtual_memory()
+                ram_percent = memory.percent
+                ram_used_gb = memory.used / (1024 ** 3)
+                ram_total_gb = memory.total / (1024 ** 3)
+        else:
+            # Not in Docker - use system stats
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            memory = psutil.virtual_memory()
+            ram_percent = memory.percent
+            ram_used_gb = memory.used / (1024 ** 3)
+            ram_total_gb = memory.total / (1024 ** 3)
         
         # Queue count
         queue_count = len([j for j in jobs.values() if j.get('status') in ['queued', 'processing']])
@@ -143,7 +223,8 @@ async def get_resources():
                 "seconds": uptime_seconds,
                 "formatted": f"{uptime_seconds // 3600}h {(uptime_seconds % 3600) // 60}m"
             },
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "container": is_docker
         }
     except Exception as e:
         return {

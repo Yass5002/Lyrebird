@@ -15,6 +15,9 @@
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
             background-attachment: fixed;
+            box-shadow: none !important;
+            margin: 0;
+            padding: 0;
         }
 
         .glass {
@@ -28,6 +31,7 @@
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
         .gradient-text {
@@ -59,12 +63,14 @@
             backdrop-filter: blur(10px);
             color: white;
             transition: all 0.3s ease;
+            box-shadow: none !important;
         }
 
         .input-glass:focus {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(167, 139, 250, 0.5);
             outline: none;
+            box-shadow: none !important;
         }
 
         .input-glass::placeholder {
@@ -77,10 +83,15 @@
         /* --- NEW CUSTOM DROPDOWN STYLES --- */
         
         /* Style for the button to match other inputs */
+        #customSelectButton {
+            box-shadow: none !important;
+        }
+        
         #customSelectButton:focus {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(167, 139, 250, 0.5);
             outline: none;
+            box-shadow: none !important;
         }
 
         /* Style for the dropdown panel */
@@ -585,16 +596,15 @@
             document.getElementById('uptime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        // ### TASK 3: UNTOUCHED RESOURCE LOGIC ###
-        // This is your original, working function.
+        // ### CONTAINER RESOURCE MONITORING ###        
         async function startResourceMonitoring() {
             updateResources();
-            resourceInterval = setInterval(updateResources, 3000);
+            resourceInterval = setInterval(updateResources, 2000); // Update every 2 seconds
         }
 
         async function updateResources() {
             try {
-                // Get real resource data from API
+                // Get real container resource data from API
                 const response = await fetch(`${API_BASE_URL}/api/resources`);
                 const data = await response.json();
                 
@@ -603,12 +613,12 @@
                     return;
                 }
 
-                // Update CPU
+                // Update CPU (direct values from container)
                 const cpu = data.cpu.percent;
                 document.getElementById('cpuValue').textContent = cpu + '%';
                 document.getElementById('cpuBar').style.width = cpu + '%';
                 
-                // Update RAM
+                // Update RAM (direct values from container)
                 const ram = data.ram.percent;
                 document.getElementById('ramValue').textContent = ram + '%';
                 document.getElementById('ramBar').style.width = ram + '%';
@@ -617,11 +627,16 @@
                 const queue = data.queue.count;
                 document.getElementById('queueValue').textContent = queue;
                 document.getElementById('queueBar').style.width = Math.min(queue * 20, 100) + '%';
+                
+                // Log container status
+                if (data.container !== undefined) {
+                    console.log('Running in container:', data.container);
+                }
             } catch (error) {
                 console.error('Resource monitoring error:', error);
             }
         }
-        // ### END OF UNTOUCHED LOGIC ###
+        // ### END OF RESOURCE MONITORING ###
 
 
         // ### TASK 3: UNTOUCHED LANGUAGE LOGIC ###
