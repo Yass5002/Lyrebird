@@ -12,8 +12,7 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* === FIX 1: Robust Shadow & Outline Reset === */
-        /* This is a more reliable way to remove all shadows and focus rings */
+        /* === Robust Shadow & Outline Reset === */
         :root {
             --tw-ring-color: transparent !important;
             --tw-ring-offset-shadow: 0 0 #0000 !important;
@@ -26,40 +25,48 @@
             box-shadow: none !important;
         }
 
-
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            /* Layout: make body a column flex so footer can sit at the bottom */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+
+            /* UPDATED: Deep modern black gradient with subtle depth */
+            background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #1a1a1a 100%);
             background-attachment: fixed;
             margin: 0;
-            padding: 0;
+            padding: 0 !important;
         }
 
         /* Hide everything initially to prevent flash */
         .app-container {
             opacity: 0;
             transition: opacity 0.3s ease;
+            flex: 1 1 auto;
+            padding: 1rem;
         }
 
         .app-loaded {
             opacity: 1;
         }
 
-        /* === FIX 2: Performance Boost for Glassmorphism === */
-        /* This promotes glass elements to their own GPU layer, preventing rendering glitches */
+        /* === Performance Boost for Glassmorphism === */
         .glass, .glass-strong, .modal-backdrop, .error-notification, .success-notification {
             transform: translateZ(0);
         }
 
+        /* UPDATED: Increased opacity for better visibility on black */
         .glass {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.07);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
+        /* UPDATED: Enhanced glassmorphism for primary containers */
         .glass-strong {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .gradient-text {
@@ -83,16 +90,17 @@
             cursor: not-allowed;
         }
 
+        /* UPDATED: Brighter inputs for black background */
         .input-glass {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             color: white;
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .input-glass:focus {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.12);
             border-color: rgba(167, 139, 250, 0.5);
             outline: none;
         }
@@ -108,13 +116,14 @@
 
         /* Custom dropdown styles */
         #customSelectButton:focus {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.12);
             border-color: rgba(167, 139, 250, 0.5);
             outline: none;
         }
 
+        /* UPDATED: Modern black dropdown with enhanced visibility */
         #customSelectDropdown {
-            background: rgba(30, 27, 75, 0.95);
+            background: rgba(10, 10, 10, 0.97);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transform-origin: top;
@@ -170,8 +179,9 @@
             transform: rotate(180deg);
         }
 
+        /* UPDATED: Enhanced modal backdrop for black theme */
         .modal-backdrop {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
         }
 
@@ -213,37 +223,71 @@
             border: none;
         }
 
-        /* Error notification */
+        /* UPDATED: Error notification with enhanced shadows for black background */
         .error-notification {
             position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(239, 68, 68, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            top: clamp(0.75rem, 2.5vh, 2rem);
+            right: clamp(0.75rem, 2.5vw, 2rem);
+            background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(239,68,68,0.035));
+            backdrop-filter: blur(12px) saturate(125%);
+            border: 1px solid rgba(239,68,68,0.12);
             border-radius: 1rem;
-            padding: 1rem 1.5rem;
-            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            padding: clamp(0.5rem, 1.5vw, 1rem) clamp(0.75rem, 2.5vw, 1.5rem);
+            color: #fff;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.45);
             z-index: 1000;
             animation: slideIn 0.3s ease-out;
-            max-width: 400px;
+            font-size: clamp(0.8rem, 1.6vw, 1rem);
+            max-width: min(90vw, 28rem);
         }
 
-        /* Success notification */
+        .error-notification::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+            background-repeat: repeat;
+            opacity: 0.04;
+            pointer-events: none;
+            mix-blend-mode: normal;
+        }
+
+        .error-notification > * { position: relative; z-index: 1; }
+
+        /* UPDATED: Success notification with enhanced shadows */
         .success-notification {
             position: fixed;
-            top: 2rem;
-            right: 2rem;
-            background: rgba(34, 197, 94, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            top: clamp(0.75rem, 2.5vh, 2rem);
+            right: clamp(0.75rem, 2.5vw, 2rem);
+            background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.035));
+            backdrop-filter: blur(12px) saturate(125%);
+            border: 1px solid rgba(34,197,94,0.12);
             border-radius: 1rem;
-            padding: 1rem 1.5rem;
-            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            padding: clamp(0.5rem, 1.5vw, 1rem) clamp(0.75rem, 2.5vw, 1.5rem);
+            color: #fff;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.35);
             z-index: 1000;
             animation: slideIn 0.3s ease-out;
-            max-width: 400px;
+            font-size: clamp(0.8rem, 1.6vw, 1rem);
+            max-width: min(90vw, 28rem);
         }
+
+        .success-notification::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+            background-repeat: repeat;
+            opacity: 0.04;
+            pointer-events: none;
+            mix-blend-mode: normal;
+        }
+
+        .success-notification > * { position: relative; z-index: 1; }
 
         @keyframes slideIn {
             from {
@@ -269,6 +313,18 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Footer styling */
+        footer {
+            margin-top: 1.5rem !important;
+            padding-top: 0.75rem !important;
+            padding-bottom: 0.75rem !important;
+        }
+
+        /* Responsive padding */
+        @media (min-width: 768px) {
+            .app-container { padding: 2rem; }
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
@@ -277,8 +333,11 @@
     <div class="max-w-7xl mx-auto app-container" id="appContainer">
         <!-- Header -->
         <header class="text-center mb-12">
-            <h1 class="text-6xl md:text-7xl font-bold gradient-text mb-4">Lyrebird</h1>
-            <p class="text-white/60 text-lg">Neural Voice Synthesis</p>
+            <div class="flex items-center justify-center mb-4" style="gap: clamp(0.5rem, 2vw, 1.5rem);">
+                <img src="../logo.png" alt="Lyrebird Logo" style="width: clamp(3rem, 8vw, 6rem); height: clamp(3rem, 8vw, 6rem);">
+                <h1 class="font-bold gradient-text" style="font-size: clamp(2.5rem, 8vw, 6rem); line-height: 1.1;">Lyrebird</h1>
+            </div>
+            <p class="text-white/60" style="font-size: clamp(1rem, 2vw, 1.25rem);">Neural Voice Synthesis</p>
         </header>
 
         <div class="grid lg:grid-cols-3 gap-8">
@@ -438,8 +497,7 @@
                     </div>
                 </div>
 
-                <!-- Info Button - FIXED -->
-                <!-- Note: Removed the .info-button class and added transitions directly -->
+                <!-- Info Button -->
                 <button 
                     onclick="openModal()" 
                     class="glass w-full rounded-2xl p-6 text-left hover:bg-white/10 transition-colors duration-300"
@@ -523,6 +581,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 mt-12">
+        <div class="flex items-center justify-center gap-6 mb-4">
+            <a href="https://github.com/Yass5002" target="_blank" rel="noopener noreferrer" class="text-white/60 hover:text-white transition-colors" aria-label="GitHub">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://x.com/Yass5002" target="_blank" rel="noopener noreferrer" class="text-white/60 hover:text-white transition-colors" aria-label="X (Twitter)">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/yass5oo2/" target="_blank" rel="noopener noreferrer" class="text-white/60 hover:text-white transition-colors" aria-label="Instagram">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="mailto:yass.elouazzani@outlook.com" class="text-white/60 hover:text-white transition-colors" aria-label="Email">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </a>
+        </div>
+        <p class="text-white/40 text-sm">© 2025 All rights reserved</p>
+    </footer>
 
     <script>
         // Your JavaScript remains the same. No changes needed here.
