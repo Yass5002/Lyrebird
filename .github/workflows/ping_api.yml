@@ -1,0 +1,36 @@
+name: Keep API Alive
+
+on:
+  schedule:
+    # Runs every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Ping Hugging Face API
+        run: |
+          echo "Pinging API at $(date)"
+          
+          # Ping health endpoint
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://yassineai01-lyrebird.hf.space/api/health)
+          
+          if [ $response -eq 200 ]; then
+            echo "✅ API is healthy (HTTP $response)"
+          else
+            echo "⚠️  API returned HTTP $response"
+          fi
+          
+          # Also ping the main page to keep it warm
+          curl -s -o /dev/null https://yassineai01-lyrebird.hf.space/
+          
+          echo "Ping completed at $(date)"
+      
+      - name: Summary
+        run: |
+          echo "### API Status 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "Pinged at: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "Target: https://yassineai01-lyrebird.hf.space" >> $GITHUB_STEP_SUMMARY
