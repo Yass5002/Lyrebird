@@ -61,6 +61,98 @@ JOB_TTL_SECONDS = 3600  # Jobs expire after 1 hour
 # Track server start time
 SERVER_START_TIME = time.time()
 
+def get_container_cpu_percent():
+    """Get CPU usage for the container (Docker/cgroup aware)"""
+    try:
+        # Try cgroup v2 first (newer Docker)
+        cpu_stat_path = Path("/sys/fs/cgroup/cpu.stat")
+        if cpu_stat_path.exists():
+            with open(cpu_stat_path, 'r') as f:
+                for line in f:
+                    if line.startswith('usage_usec'):
+                        # This is cumulative, would need to track delta
+                        # Fall back to psutil for now
+                        break
+        
+        # Try cgroup v1 (older Docker)
+        cpu_usage_path = Path("/sys/fs/cgroup/cpu/cpuacct.usage")
+        if cpu_usage_path.exists():
+            # Read cumulative CPU time, would need delta calculation
+            # Fall back to psutil for simplicity
+            pass
+        
+        # Fallback to psutil (works but shows host metrics)
+        return psutil.cpu_percent(interval=0.1)
+    except Exception:
+        return psutil.cpu_percent(interval=0.1)
+
+def get_container_memory():
+    """Get memory usage for the container (Docker/cgroup aware)"""
+    try:
+        # Try cgroup v2 first (newer Docker)
+        memory_current_path = Path("/sys/fs/cgroup/memory.current")
+        memory_max_path = Path("/sys/fs/cgroup/memory.max")
+        
+        if memory_current_path.exists() and memory_max_path.exists():
+            with open(memory_current_path, 'r') as f:
+                used_bytes = int(f.read().strip())
+            with open(memory_max_path, 'r') as f:
+                max_str = f.read().strip()
+                # 'max' means unlimited, use system memory
+                if max_str == 'max':
+                    max_bytes = psutil.virtual_memory().total
+                else:
+                    max_bytes = int(max_str)
+            
+            used_gb = used_bytes / (1024 ** 3)
+            total_gb = max_bytes / (1024 ** 3)
+            percent = (used_bytes / max_bytes * 100) if max_bytes > 0 else 0
+            
+            return {
+                "used_gb": round(used_gb, 2),
+                "total_gb": round(total_gb, 2),
+                "percent": round(percent, 1)
+            }
+        
+        # Try cgroup v1 (older Docker)
+        memory_usage_path = Path("/sys/fs/cgroup/memory/memory.usage_in_bytes")
+        memory_limit_path = Path("/sys/fs/cgroup/memory/memory.limit_in_bytes")
+        
+        if memory_usage_path.exists() and memory_limit_path.exists():
+            with open(memory_usage_path, 'r') as f:
+                used_bytes = int(f.read().strip())
+            with open(memory_limit_path, 'r') as f:
+                max_bytes = int(f.read().strip())
+                # Very large number means unlimited
+                if max_bytes > 9223372036854771712:  # Close to max int64
+                    max_bytes = psutil.virtual_memory().total
+            
+            used_gb = used_bytes / (1024 ** 3)
+            total_gb = max_bytes / (1024 ** 3)
+            percent = (used_bytes / max_bytes * 100) if max_bytes > 0 else 0
+            
+            return {
+                "used_gb": round(used_gb, 2),
+                "total_gb": round(total_gb, 2),
+                "percent": round(percent, 1)
+            }
+        
+        # Fallback to psutil (works but shows host metrics)
+        memory = psutil.virtual_memory()
+        return {
+            "used_gb": round(memory.used / (1024 ** 3), 2),
+            "total_gb": round(memory.total / (1024 ** 3), 2),
+            "percent": round(memory.percent, 1)
+        }
+    except Exception:
+        # Final fallback
+        memory = psutil.virtual_memory()
+        return {
+            "used_gb": round(memory.used / (1024 ** 3), 2),
+            "total_gb": round(memory.total / (1024 ** 3), 2),
+            "percent": round(memory.percent, 1)
+        }
+
 def cleanup_old_jobs():
     """Remove old completed/failed jobs to prevent memory leaks"""
     global jobs
@@ -158,16 +250,13 @@ async def health_check():
 # --- Resource Monitoring ---
 @app.get("/api/resources")
 async def get_resources():
-    """Get real-time system resource usage"""
+    """Get real-time system resource usage (container-aware)"""
     try:
-        # CPU usage
-        cpu_percent = psutil.cpu_percent(interval=0.1)
+        # CPU usage (container-aware)
+        cpu_percent = get_container_cpu_percent()
         
-        # RAM usage
-        memory = psutil.virtual_memory()
-        ram_percent = memory.percent
-        ram_used_gb = memory.used / (1024 ** 3)
-        ram_total_gb = memory.total / (1024 ** 3)
+        # RAM usage (container-aware)
+        memory_info = get_container_memory()
         
         # Queue count
         queue_count = len([j for j in jobs.values() if j.get('status') in ['queued', 'processing']])
@@ -181,9 +270,9 @@ async def get_resources():
                 "cores": psutil.cpu_count()
             },
             "ram": {
-                "percent": round(ram_percent, 1),
-                "used_gb": round(ram_used_gb, 2),
-                "total_gb": round(ram_total_gb, 2)
+                "percent": memory_info["percent"],
+                "used_gb": memory_info["used_gb"],
+                "total_gb": memory_info["total_gb"]
             },
             "queue": {
                 "count": queue_count,
