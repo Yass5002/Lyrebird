@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyrebird - Voice Cloning</title>
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="manifest" href="site.webmanifest">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -31,7 +35,7 @@
             flex-direction: column;
             min-height: 100vh;
 
-            /* UPDATED: Deep modern black gradient with subtle depth */
+            /* NEW: Deep modern black gradient with subtle depth */
             background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #1a1a1a 100%);
             background-attachment: fixed;
             margin: 0;
@@ -228,15 +232,14 @@
             position: fixed;
             top: clamp(0.75rem, 2.5vh, 2rem);
             right: clamp(0.75rem, 2.5vw, 2rem);
-            background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(239,68,68,0.035));
-            backdrop-filter: blur(12px) saturate(125%);
-            border: 1px solid rgba(239,68,68,0.12);
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+            backdrop-filter: blur(12px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
             overflow: hidden;
             padding: clamp(0.5rem, 1.5vw, 1rem) clamp(0.75rem, 2.5vw, 1.5rem);
-            color: #fff;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.45);
+            color: white;
             z-index: 1000;
             animation: slideIn 0.3s ease-out;
             font-size: clamp(0.8rem, 1.6vw, 1rem);
@@ -261,15 +264,14 @@
             position: fixed;
             top: clamp(0.75rem, 2.5vh, 2rem);
             right: clamp(0.75rem, 2.5vw, 2rem);
-            background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.035));
-            backdrop-filter: blur(12px) saturate(125%);
-            border: 1px solid rgba(34,197,94,0.12);
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+            backdrop-filter: blur(12px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
             overflow: hidden;
             padding: clamp(0.5rem, 1.5vw, 1rem) clamp(0.75rem, 2.5vw, 1.5rem);
-            color: #fff;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+            color: white;
             z-index: 1000;
             animation: slideIn 0.3s ease-out;
             font-size: clamp(0.8rem, 1.6vw, 1rem);
@@ -314,7 +316,7 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Footer styling */
+        /* CLEANED UP: Footer styles (removed duplicates) */
         footer {
             margin-top: 1.5rem !important;
             padding-top: 0.75rem !important;
@@ -325,20 +327,191 @@
         @media (min-width: 768px) {
             .app-container { padding: 2rem; }
         }
+
+        /* UPDATED: Resource Monitor Styles with enhanced glass effect */
+        .resource-bar {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .resource-gauge {
+            position: relative;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .resource-gauge-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .resource-gauge-fill.low {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        }
+
+        .resource-gauge-fill.medium {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+        }
+
+        .resource-gauge-fill.high {
+            background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
 
     <!-- Main Container -->
     <div class="max-w-7xl mx-auto app-container" id="appContainer">
-        <!-- Header -->
-        <header class="text-center mb-12">
-            <div class="flex items-center justify-center mb-4" style="gap: clamp(0.5rem, 2vw, 1.5rem);">
-                <img src="https://raw.githubusercontent.com/Yass5002/Assets/main/logo.png" alt="Lyrebird Logo" style="width: clamp(3rem, 8vw, 6rem); height: clamp(3rem, 8vw, 6rem);">
-                <h1 class="font-bold gradient-text" style="font-size: clamp(2.5rem, 8vw, 6rem); line-height: 1.1;">Lyrebird</h1>
+<!-- Header -->
+<header class="text-center mb-12 relative">
+    <!-- Subtle glow effect behind logo -->
+    <div class="absolute inset-0 flex items-start justify-center pointer-events-none">
+        <div class="w-96 h-96 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-transparent rounded-full blur-3xl opacity-50 -mt-32"></div>
+    </div>
+    
+    <!-- Logo and Title Section -->
+    <div class="relative z-10">
+        <!-- Always horizontal layout - takes FULL WIDTH on mobile with moderate vertical padding -->
+        <div class="mb-3 animate-fade-in px-2 py-3 sm:py-2 sm:px-4 md:py-0 md:px-8">
+            <div class="flex flex-row items-center justify-center gap-[3vw] sm:gap-[2vw]">
+                <!-- Logo scales with available space -->
+                <img 
+                    src="https://raw.githubusercontent.com/Yass5002/Assets/main/logo.png" 
+                    alt="Lyrebird Logo" 
+                    class="hover:scale-110 transition-transform duration-500 ease-out flex-shrink-0"
+                    style="width: clamp(3.5rem, 15vw, 6rem); 
+                           height: clamp(3.5rem, 15vw, 6rem); 
+                           filter: drop-shadow(0 4px 20px rgba(167, 139, 250, 0.3));">
+                
+                <!-- Text grows to fill available space -->
+                <h1 class="font-bold gradient-text tracking-tight animate-gradient"
+                    style="font-size: clamp(3rem, 18vw, 7rem); 
+                           line-height: 1; 
+                           letter-spacing: -0.02em;">
+                    Lyrebird
+                </h1>
             </div>
-            <p class="text-white/60" style="font-size: clamp(1rem, 2vw, 1.25rem);">Neural Voice Synthesis</p>
-        </header>
+        </div>
+        
+        <!-- Tagline kept close to logo/title -->
+        <div class="mb-6 sm:mb-8 animate-fade-in-delay-1 px-2">
+            <p class="text-white/90 font-light tracking-widest uppercase" 
+               style="font-size: clamp(0.7rem, 2vw, 0.875rem);">
+                <span class="inline-block px-3 py-1 rounded-full bg-white/5 backdrop-blur border border-white/10">
+                    Neural synthesis
+                </span>
+            </p>
+        </div>
+        
+        <!-- Main Description with Premium Card -->
+        <div class="max-w-3xl mx-auto animate-fade-in-delay-2 px-2 sm:px-4 md:px-0">
+            <div class="relative group">
+                <!-- Hover glow effect -->
+                <div class="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <!-- Content card -->
+                <div class="relative glass-strong rounded-2xl backdrop-blur-xl" 
+                     style="padding: clamp(1rem, 3vw, 2rem);">
+                    <div class="flex items-center gap-2 mb-3 sm:mb-4">
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                        <span class="uppercase tracking-widest text-white/50 font-medium px-2 sm:px-3"
+                              style="font-size: clamp(0.65rem, 1.2vw, 0.75rem);">Features</span>
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                    </div>
+                    
+                    <p class="text-white/85 leading-relaxed" 
+                       style="font-size: clamp(0.9rem, 2vw, 1.125rem); line-height: 1.7;">
+                        Transform any voice with our cutting-edge AI technology. 
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-medium mx-1"
+                              style="font-size: clamp(0.75rem, 1.5vw, 0.875rem);">
+                            <svg class="w-[1em] h-[1em]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            5 seconds
+                        </span>
+                        <span class="inline">of audio is all it takes to create stunningly realistic voice clones.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="mt-6 animate-fade-in-delay-3">
+            <p class="text-white/60 flex items-center justify-center gap-2"
+               style="font-size: clamp(0.75rem, 1.5vw, 0.875rem);">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                Ready to use • No signup required
+            </p>
+        </div>
+    </div>
+</header>
+        <!-- Resource Monitor Bar -->
+        <div class="resource-bar rounded-2xl p-4 mb-8" id="resourceMonitor">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- CPU Usage -->
+                <div class="resource-item flex-col items-start">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <div class="pulse-dot"></div>
+                        <span class="text-white/70 text-sm font-medium">CPU</span>
+                        <span class="text-white/90 text-sm font-semibold ml-auto" id="cpuPercent">--</span>
+                    </div>
+                    <div class="resource-gauge w-full">
+                        <div class="resource-gauge-fill" id="cpuGauge" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- RAM Usage -->
+                <div class="resource-item flex-col items-start">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <div class="pulse-dot" style="background: #8b5cf6;"></div>
+                        <span class="text-white/70 text-sm font-medium">RAM</span>
+                        <span class="text-white/90 text-sm font-semibold ml-auto" id="ramPercent">--</span>
+                    </div>
+                    <div class="resource-gauge w-full">
+                        <div class="resource-gauge-fill" id="ramGauge" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Queue Status -->
+                <div class="resource-item flex-col items-start">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <div class="pulse-dot" style="background: #ec4899;"></div>
+                        <span class="text-white/70 text-sm font-medium">Queue</span>
+                        <span class="text-white/90 text-sm font-semibold ml-auto" id="queueCount">--</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-white/50 w-full">
+                        <span>Uptime: <span id="uptime">--</span></span>
+                        <span class="ml-auto">Jobs: <span id="totalJobs">--</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="grid lg:grid-cols-3 gap-8">
             <!-- Main Form -->
@@ -602,15 +775,14 @@
     </footer>
 
     <script>
-        // Your JavaScript remains the same. No changes needed here.
         let currentJobId = null;
         let pollInterval = null;
         let languagesCache = null;
         let dropdownOpen = false;
         let isProcessing = false;
         
-        // API endpoint configuration
-        const API_BASE_URL = ""; 
+        // API endpoint configuration - GitHub Pages points to Hugging Face
+        const API_BASE_URL = "https://yassineai01-lyrebird.hf.space"; 
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -619,6 +791,9 @@
             
             // Setup all event listeners
             setupEventListeners();
+            
+            // Start resource monitoring
+            startResourceMonitoring();
             
             // Check for existing job in localStorage
             const existingJobId = localStorage.getItem('active_lyrebird_job');
@@ -647,7 +822,77 @@
             }
         });
 
-        // Modal functions
+        // === Resource Monitoring Functions ===
+        let resourceInterval = null;
+
+        async function fetchResourceData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/resources`);
+                if (!response.ok) throw new Error('Failed to fetch resources');
+                
+                const data = await response.json();
+                updateResourceUI(data);
+            } catch (error) {
+                console.error('Resource monitoring error:', error);
+                // Show error state in UI
+                document.getElementById('cpuPercent').textContent = 'Error';
+                document.getElementById('ramPercent').textContent = 'Error';
+                document.getElementById('queueCount').textContent = 'Error';
+            }
+        }
+
+        function updateResourceUI(data) {
+            // CPU
+            const cpuPercent = data.cpu?.percent || 0;
+            document.getElementById('cpuPercent').textContent = `${cpuPercent}%`;
+            const cpuGauge = document.getElementById('cpuGauge');
+            cpuGauge.style.width = `${cpuPercent}%`;
+            cpuGauge.className = 'resource-gauge-fill ' + getGaugeClass(cpuPercent);
+
+            // RAM
+            const ramPercent = data.ram?.percent || 0;
+            const ramUsed = data.ram?.used_gb || 0;
+            const ramTotal = data.ram?.total_gb || 0;
+            document.getElementById('ramPercent').textContent = `${ramPercent}% (${ramUsed.toFixed(1)}/${ramTotal.toFixed(1)} GB)`;
+            const ramGauge = document.getElementById('ramGauge');
+            ramGauge.style.width = `${ramPercent}%`;
+            ramGauge.className = 'resource-gauge-fill ' + getGaugeClass(ramPercent);
+
+            // Queue
+            const queueCount = data.queue?.count || 0;
+            document.getElementById('queueCount').textContent = `${queueCount} active`;
+            
+            // Uptime
+            const uptime = data.uptime?.formatted || '--';
+            document.getElementById('uptime').textContent = uptime;
+
+            // Total jobs
+            const totalJobs = data.queue?.jobs?.completed || 0;
+            document.getElementById('totalJobs').textContent = totalJobs;
+        }
+
+        function getGaugeClass(percent) {
+            if (percent < 50) return 'low';
+            if (percent < 80) return 'medium';
+            return 'high';
+        }
+
+        function startResourceMonitoring() {
+            // Fetch immediately
+            fetchResourceData();
+            
+            // Then fetch every 5 seconds
+            resourceInterval = setInterval(fetchResourceData, 5000);
+        }
+
+        // Cleanup resource monitoring on page unload
+        window.addEventListener('beforeunload', () => {
+            if (resourceInterval) {
+                clearInterval(resourceInterval);
+            }
+        });
+
+        // === Modal functions ===
         function openModal() {
             const modal = document.getElementById('modal');
             modal.classList.remove('hidden');

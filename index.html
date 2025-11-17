@@ -388,15 +388,89 @@
 
     <!-- Main Container -->
     <div class="max-w-7xl mx-auto app-container" id="appContainer">
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <div class="flex items-center justify-center mb-4" style="gap: clamp(0.5rem, 2vw, 1.5rem);">
-                <img src="https://raw.githubusercontent.com/Yass5002/Assets/main/logo.png" alt="Lyrebird Logo" style="width: clamp(3rem, 8vw, 6rem); height: clamp(3rem, 8vw, 6rem);">
-                <h1 class="font-bold gradient-text" style="font-size: clamp(2.5rem, 8vw, 6rem); line-height: 1.1;">Lyrebird</h1>
+<!-- Header -->
+<header class="text-center mb-12 relative">
+    <!-- Subtle glow effect behind logo -->
+    <div class="absolute inset-0 flex items-start justify-center pointer-events-none">
+        <div class="w-96 h-96 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-transparent rounded-full blur-3xl opacity-50 -mt-32"></div>
+    </div>
+    
+    <!-- Logo and Title Section -->
+    <div class="relative z-10">
+        <!-- Always horizontal layout - takes FULL WIDTH on mobile with moderate vertical padding -->
+        <div class="mb-3 animate-fade-in px-2 py-3 sm:py-2 sm:px-4 md:py-0 md:px-8">
+            <div class="flex flex-row items-center justify-center gap-[3vw] sm:gap-[2vw]">
+                <!-- Logo scales with available space -->
+                <img 
+                    src="https://raw.githubusercontent.com/Yass5002/Assets/main/logo.png" 
+                    alt="Lyrebird Logo" 
+                    class="hover:scale-110 transition-transform duration-500 ease-out flex-shrink-0"
+                    style="width: clamp(3.5rem, 15vw, 6rem); 
+                           height: clamp(3.5rem, 15vw, 6rem); 
+                           filter: drop-shadow(0 4px 20px rgba(167, 139, 250, 0.3));">
+                
+                <!-- Text grows to fill available space -->
+                <h1 class="font-bold gradient-text tracking-tight animate-gradient"
+                    style="font-size: clamp(3rem, 18vw, 7rem); 
+                           line-height: 1; 
+                           letter-spacing: -0.02em;">
+                    Lyrebird
+                </h1>
             </div>
-            <p class="text-white/60" style="font-size: clamp(1rem, 2vw, 1.25rem);">Neural Voice Synthesis</p>
-        </header>
-
+        </div>
+        
+        <!-- Tagline kept close to logo/title -->
+        <div class="mb-6 sm:mb-8 animate-fade-in-delay-1 px-2">
+            <p class="text-white/90 font-light tracking-widest uppercase" 
+               style="font-size: clamp(0.7rem, 2vw, 0.875rem);">
+                <span class="inline-block px-3 py-1 rounded-full bg-white/5 backdrop-blur border border-white/10">
+                    Neural synthesis
+                </span>
+            </p>
+        </div>
+        
+        <!-- Main Description with Premium Card -->
+        <div class="max-w-3xl mx-auto animate-fade-in-delay-2 px-2 sm:px-4 md:px-0">
+            <div class="relative group">
+                <!-- Hover glow effect -->
+                <div class="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <!-- Content card -->
+                <div class="relative glass-strong rounded-2xl backdrop-blur-xl" 
+                     style="padding: clamp(1rem, 3vw, 2rem);">
+                    <div class="flex items-center gap-2 mb-3 sm:mb-4">
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                        <span class="uppercase tracking-widest text-white/50 font-medium px-2 sm:px-3"
+                              style="font-size: clamp(0.65rem, 1.2vw, 0.75rem);">Features</span>
+                        <div class="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                    </div>
+                    
+                    <p class="text-white/85 leading-relaxed" 
+                       style="font-size: clamp(0.9rem, 2vw, 1.125rem); line-height: 1.7;">
+                        Transform any voice with our cutting-edge AI technology. 
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-medium mx-1"
+                              style="font-size: clamp(0.75rem, 1.5vw, 0.875rem);">
+                            <svg class="w-[1em] h-[1em]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            5 seconds
+                        </span>
+                        <span class="inline">of audio is all it takes to create stunningly realistic voice clones.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="mt-6 animate-fade-in-delay-3">
+            <p class="text-white/60 flex items-center justify-center gap-2"
+               style="font-size: clamp(0.75rem, 1.5vw, 0.875rem);">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                Ready to use • No signup required
+            </p>
+        </div>
+    </div>
+</header>
         <!-- Resource Monitor Bar -->
         <div class="resource-bar rounded-2xl p-4 mb-8" id="resourceMonitor">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
