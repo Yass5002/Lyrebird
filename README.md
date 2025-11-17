@@ -1,89 +1,67 @@
----
-title: Lyrebird Voice Cloning
-emoji: 🎙️
-colorFrom: purple
-colorTo: blue
-sdk: docker
-pinned: false
-license: other
-app_port: 7860
----
+# 🎙️ Lyrebird Voice Cloning
 
-# 🎙️ Lyrebird - XTTS Voice Cloning API
+A simple and powerful tool for high-quality multilingual voice cloning. Give it a few seconds of audio, and it can generate speech in over 15 languages using that voice.
 
-High-quality multilingual voice cloning powered by Coqui XTTS v2.
+This project provides a clean web interface and a RESTful API for voice cloning, powered by the Coqui XTTS v2 model. It's optimized to run efficiently on a CPU.
+
+## 🌐 Live Demo
+
+You can try Lyrebird live at: **[yass5002.github.io/Lyrebird/](https://yass5002.github.io/Lyrebird/)**
 
 ## ✨ Features
 
-- **17 Languages**: English, Spanish, French, German, Italian, Portuguese, Polish, Turkish, Russian, Dutch, Czech, Arabic, Chinese, Japanese, Hungarian, Korean, Hindi
-- **Easy Web Interface**: Upload audio and generate cloned voices instantly
-- **RESTful API**: Full API access with automatic documentation
-- **Auto-Punctuation**: Natural sentence splitting for better results
-- **CPU Optimized**: Runs efficiently on CPU hardware
+- **Multilingual Cloning**: Supports 17 languages.
+- **Web Interface**: Easy-to-use UI for quick voice cloning.
+- **RESTful API**: Integrate voice cloning into your own applications.
+- **CPU Optimized**: Runs efficiently without a dedicated GPU.
 
-## 🚀 How to Use
+## 🚀 Getting Started
 
-### Web Interface
+You can run Lyrebird using Docker, locally with Python, or deploy it to a Hugging Face Space.
 
-1. Visit the Space URL
-2. Upload 5-15 seconds of clean reference audio
-3. Enter the text you want to synthesize (max 2000 characters)
-4. Select output language
-5. Click "Generate Voice Clone" and wait
-6. Download your generated audio!
+### With Docker (Recommended)
 
-### API Usage
+1.  **Build the Docker image:**
+    ```bash
+    docker build -t lyrebird .
+    ```
+2.  **Run the container:**
+    ```bash
+    docker run -p 7860:7860 lyrebird
+    ```
+3.  Open your browser and go to `http://localhost:7860`.
 
-**Health Check:**
-```bash
-curl https://huggingface.co/spaces/YassineAi01/Lyrebird/api/health
-```
+### Locally with Python
 
-**Clone Voice (Async):**
-```bash
-curl -X POST "https://huggingface.co/spaces/YassineAi01/Lyrebird/api/clone/async" \
-  -F "text=Hello world! This is a test of voice cloning." \
-  -F "audio=@your_voice.wav" \
-  -F "language=English"
-```
+1.  **Create a virtual environment:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+2.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  **Run the application:**
+    ```bash
+    python api.py
+    ```
+4.  Open your browser and go to `http://localhost:7860`.
 
-**Get Job Status:**
-```bash
-curl https://huggingface.co/spaces/YassineAi01/Lyrebird/api/jobs/{job_id}
-```
+### Deploy to Hugging Face Spaces
 
-**API Documentation:**  
-Visit `/docs` for interactive Swagger documentation.
+1.  **Create a Space**: Click [here](https://huggingface.co/new-space) to create a new Hugging Face Space.
+2.  **Choose Docker**: Select `Docker` as the Space SDK and choose a hardware configuration (the free CPU option is sufficient).
+3.  **Upload Files**: Upload all the project files (`api.py`, `core.py`, `Dockerfile`, `requirements.txt`, etc.) to the repository created for your Space.
+4.  **Deploy**: Hugging Face will automatically build the Docker image and deploy your application. You can then access it from the Space's URL.
 
 ## 📋 Supported Languages
 
-English, Spanish, French, German, Italian, Portuguese, Polish, Turkish, Russian, Dutch, Czech, Arabic, Chinese, Japanese, Hungarian, Korean, Hindi
-
-## 💡 Tips for Best Results
-
-- Use high-quality reference audio (no background noise)
-- Single speaker only in reference audio
-- Clear pronunciation in reference
-- Reference audio: 5-15 seconds is optimal
-- Supported formats: WAV, MP3, FLAC, OGG, M4A
-- Add punctuation for natural pacing
-
-## ⚙️ Technical Details
-
-- **Model**: XTTS v2 (Coqui TTS)
-- **Framework**: PyTorch + FastAPI
-- **Device**: CPU (optimized)
-- **Processing Time**: 30-90 seconds depending on text length
+English, Spanish, French, German, Italian, Portuguese, Polish, Turkish, Russian, Dutch, Czech, Arabic, Chinese, Japanese, Hungarian, Korean, and Hindi.
 
 ## ⚖️ License
 
-Coqui XTTS v2 - [CPML License](https://coqui.ai/cpml.txt)  
-**For personal and research use only.**
+The Coqui XTTS v2 model is released under the [CPML License](https://coqui.ai/cpml.txt). This tool is intended for personal and research use.
 
-## ⚠️ Important
+> **Important**: Always obtain consent before cloning a voice.
 
-Always obtain consent before cloning someone's voice. This tool is for personal and research purposes only.
-
----
-
-Built with ❤️ using Coqui XTTS v2
