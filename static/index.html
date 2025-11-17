@@ -12,10 +12,20 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Remove all box-shadows globally */
-        *, *::before, *::after {
+        /* === FIX 1: Robust Shadow & Outline Reset === */
+        /* This is a more reliable way to remove all shadows and focus rings */
+        :root {
+            --tw-ring-color: transparent !important;
+            --tw-ring-offset-shadow: 0 0 #0000 !important;
+            --tw-ring-shadow: 0 0 #0000 !important;
+            --tw-shadow: 0 0 #0000 !important;
+            --tw-shadow-colored: 0 0 #0000 !important;
+        }
+        *:focus, *:focus-visible {
+            outline: none !important;
             box-shadow: none !important;
         }
+
 
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
@@ -32,6 +42,12 @@
 
         .app-loaded {
             opacity: 1;
+        }
+
+        /* === FIX 2: Performance Boost for Glassmorphism === */
+        /* This promotes glass elements to their own GPU layer, preventing rendering glitches */
+        .glass, .glass-strong, .modal-backdrop, .error-notification, .success-notification {
+            transform: translateZ(0);
         }
 
         .glass {
@@ -88,11 +104,6 @@
 
         .input-glass::placeholder {
             color: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Info button - Fixed transition */
-        .info-button {
-            transition: background-color 0.3s ease;
         }
 
         /* Custom dropdown styles */
@@ -428,9 +439,10 @@
                 </div>
 
                 <!-- Info Button - FIXED -->
+                <!-- Note: Removed the .info-button class and added transitions directly -->
                 <button 
                     onclick="openModal()" 
-                    class="glass info-button w-full rounded-2xl p-6 text-left hover:bg-white/10"
+                    class="glass w-full rounded-2xl p-6 text-left hover:bg-white/10 transition-colors duration-300"
                     aria-label="How to use guide"
                 >
                     <div class="flex items-center justify-between">
@@ -513,6 +525,7 @@
     </div>
 
     <script>
+        // Your JavaScript remains the same. No changes needed here.
         let currentJobId = null;
         let pollInterval = null;
         let languagesCache = null;
