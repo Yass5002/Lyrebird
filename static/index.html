@@ -532,8 +532,10 @@
         let dropdownOpen = false;
         let isProcessing = false;
         
-        // API endpoint configuration
-        const API_BASE_URL = ""; 
+        // API endpoint configuration - auto-detect environment
+        const API_BASE_URL = window.location.hostname.includes('github.io') 
+            ? "https://yassineai01-lyrebird.hf.space"
+            : ""; 
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
