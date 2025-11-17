@@ -46,3 +46,10 @@ scripts/
 # OS
 .DS_Store
 Thumbs.db
+
+# Favicon and manifest files (ignored by Docker, used by GitHub Pages)
+*favicon*.png
+*apple-touch-icon.png
+*android-chrome*.png
+favicon.ico
+site.webmanifest
