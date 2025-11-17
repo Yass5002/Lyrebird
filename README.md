@@ -1,3 +1,13 @@
+---
+title: Lyrebird Voice Cloning
+emoji: 🎙️
+colorFrom: purple
+colorTo: blue
+sdk: docker
+app_file: api.py
+pinned: false
+---
+
 # 🎙️ Lyrebird Voice Cloning
 
 A simple and powerful tool for high-quality multilingual voice cloning. Give it a few seconds of audio, and it can generate speech in over 15 languages using that voice.
