@@ -269,6 +269,61 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* Resource Monitor Styles */
+        .resource-bar {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .resource-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .resource-gauge {
+            position: relative;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .resource-gauge-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .resource-gauge-fill.low {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        }
+
+        .resource-gauge-fill.medium {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+        }
+
+        .resource-gauge-fill.high {
+            background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
@@ -276,10 +331,52 @@
     <!-- Main Container -->
     <div class="max-w-7xl mx-auto app-container" id="appContainer">
         <!-- Header -->
-        <header class="text-center mb-12">
+        <header class="text-center mb-8">
             <h1 class="text-6xl md:text-7xl font-bold gradient-text mb-4">Lyrebird</h1>
             <p class="text-white/60 text-lg">Neural Voice Synthesis</p>
         </header>
+
+        <!-- Resource Monitor Bar -->
+        <div class="resource-bar rounded-2xl p-4 mb-8" id="resourceMonitor">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- CPU Usage -->
+                <div class="resource-item flex-col items-start">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <div class="pulse-dot"></div>
+                        <span class="text-white/70 text-sm font-medium">CPU</span>
+                        <span class="text-white/90 text-sm font-semibold ml-auto" id="cpuPercent">--</span>
+                    </div>
+                    <div class="resource-gauge w-full">
+                        <div class="resource-gauge-fill" id="cpuGauge" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- RAM Usage -->
+                <div class="resource-item flex-col items-start">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <div class="pulse-dot" style="background: #8b5cf6;"></div>
+                        <span class="text-white/70 text-sm font-medium">RAM</span>
+                        <span class="text-white/90 text-sm font-semibold ml-auto" id="ramPercent">--</span>
+                    </div>
+                    <div class="resource-gauge w-full">
+                        <div class="resource-gauge-fill" id="ramGauge" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Queue Status -->
+                <div class="resource-item flex-col items-start">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <div class="pulse-dot" style="background: #ec4899;"></div>
+                        <span class="text-white/70 text-sm font-medium">Queue</span>
+                        <span class="text-white/90 text-sm font-semibold ml-auto" id="queueCount">--</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-white/50 w-full">
+                        <span>Uptime: <span id="uptime">--</span></span>
+                        <span class="ml-auto">Jobs: <span id="totalJobs">--</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="grid lg:grid-cols-3 gap-8">
             <!-- Main Form -->
@@ -543,6 +640,9 @@
             // Setup all event listeners
             setupEventListeners();
             
+            // Start resource monitoring
+            startResourceMonitoring();
+            
             // Check for existing job in localStorage
             const existingJobId = localStorage.getItem('active_lyrebird_job');
             
@@ -570,7 +670,77 @@
             }
         });
 
-        // Modal functions
+        // === Resource Monitoring Functions ===
+        let resourceInterval = null;
+
+        async function fetchResourceData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/resources`);
+                if (!response.ok) throw new Error('Failed to fetch resources');
+                
+                const data = await response.json();
+                updateResourceUI(data);
+            } catch (error) {
+                console.error('Resource monitoring error:', error);
+                // Show error state in UI
+                document.getElementById('cpuPercent').textContent = 'Error';
+                document.getElementById('ramPercent').textContent = 'Error';
+                document.getElementById('queueCount').textContent = 'Error';
+            }
+        }
+
+        function updateResourceUI(data) {
+            // CPU
+            const cpuPercent = data.cpu?.percent || 0;
+            document.getElementById('cpuPercent').textContent = `${cpuPercent}%`;
+            const cpuGauge = document.getElementById('cpuGauge');
+            cpuGauge.style.width = `${cpuPercent}%`;
+            cpuGauge.className = 'resource-gauge-fill ' + getGaugeClass(cpuPercent);
+
+            // RAM
+            const ramPercent = data.ram?.percent || 0;
+            const ramUsed = data.ram?.used_gb || 0;
+            const ramTotal = data.ram?.total_gb || 0;
+            document.getElementById('ramPercent').textContent = `${ramPercent}% (${ramUsed.toFixed(1)}/${ramTotal.toFixed(1)} GB)`;
+            const ramGauge = document.getElementById('ramGauge');
+            ramGauge.style.width = `${ramPercent}%`;
+            ramGauge.className = 'resource-gauge-fill ' + getGaugeClass(ramPercent);
+
+            // Queue
+            const queueCount = data.queue?.count || 0;
+            document.getElementById('queueCount').textContent = `${queueCount} active`;
+            
+            // Uptime
+            const uptime = data.uptime?.formatted || '--';
+            document.getElementById('uptime').textContent = uptime;
+
+            // Total jobs
+            const totalJobs = data.queue?.jobs?.completed || 0;
+            document.getElementById('totalJobs').textContent = totalJobs;
+        }
+
+        function getGaugeClass(percent) {
+            if (percent < 50) return 'low';
+            if (percent < 80) return 'medium';
+            return 'high';
+        }
+
+        function startResourceMonitoring() {
+            // Fetch immediately
+            fetchResourceData();
+            
+            // Then fetch every 5 seconds
+            resourceInterval = setInterval(fetchResourceData, 5000);
+        }
+
+        // Cleanup resource monitoring on page unload
+        window.addEventListener('beforeunload', () => {
+            if (resourceInterval) {
+                clearInterval(resourceInterval);
+            }
+        });
+
+        // === Modal functions ===
         function openModal() {
             const modal = document.getElementById('modal');
             modal.classList.remove('hidden');
