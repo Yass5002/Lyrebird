@@ -37,10 +37,15 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Enable CORS for frontend access
+# Enable CORS for frontend access - restricted to trusted origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify allowed origins
+    allow_origins=[
+        "https://yassineai01-lyrebird.hf.space",
+        "https://yass5002.github.io",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,8 +54,48 @@ app.add_middleware(
 # Job storage (use Redis in production for scalability)
 jobs: Dict[str, dict] = {}
 
+# Job cleanup configuration
+MAX_JOBS_IN_MEMORY = 100  # Maximum number of jobs to keep
+JOB_TTL_SECONDS = 3600  # Jobs expire after 1 hour
+
 # Track server start time
 SERVER_START_TIME = time.time()
+
+def cleanup_old_jobs():
+    """Remove old completed/failed jobs to prevent memory leaks"""
+    global jobs
+    
+    current_time = time.time()
+    jobs_to_remove = []
+    
+    # Find expired jobs
+    for job_id, job_data in jobs.items():
+        if job_data.get('status') in ['completed', 'failed']:
+            completed_at = job_data.get('completed_at')
+            if completed_at:
+                try:
+                    completed_time = datetime.fromisoformat(completed_at).timestamp()
+                    if current_time - completed_time > JOB_TTL_SECONDS:
+                        jobs_to_remove.append(job_id)
+                except Exception:
+                    pass
+    
+    # Remove expired jobs
+    for job_id in jobs_to_remove:
+        del jobs[job_id]
+    
+    # If still too many jobs, remove oldest completed/failed ones
+    if len(jobs) > MAX_JOBS_IN_MEMORY:
+        completed_jobs = [
+            (jid, jdata.get('completed_at', ''))
+            for jid, jdata in jobs.items()
+            if jdata.get('status') in ['completed', 'failed']
+        ]
+        completed_jobs.sort(key=lambda x: x[1])
+        
+        excess = len(jobs) - MAX_JOBS_IN_MEMORY
+        for job_id, _ in completed_jobs[:excess]:
+            del jobs[job_id]
 
 # --- Models ---
 class CloneRequest(BaseModel):
@@ -94,9 +139,19 @@ async def root():
 async def health_check():
     """Check API health and system status"""
     info = get_system_info()
+    
+    # Add job stats
+    active_jobs = len([j for j in jobs.values() if j.get('status') in ['queued', 'processing']])
+    total_jobs = len(jobs)
+    
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
+        "jobs": {
+            "active": active_jobs,
+            "total_in_memory": total_jobs,
+            "max_capacity": MAX_JOBS_IN_MEMORY
+        },
         **info
     }
 
@@ -179,6 +234,22 @@ async def clone_voice_api(
     For long texts or to avoid timeouts, use /api/clone/async instead.
     """
     
+    # Cleanup old jobs periodically
+    cleanup_old_jobs()
+    
+    # Validate text length
+    if len(text) > 2000:
+        raise HTTPException(
+            status_code=400,
+            detail="Text too long. Maximum 2000 characters allowed."
+        )
+    
+    if len(text.strip()) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Text cannot be empty."
+        )
+    
     # Validate language
     if language not in SUPPORTED_LANGUAGES:
         raise HTTPException(
@@ -195,6 +266,23 @@ async def clone_voice_api(
         raise HTTPException(
             status_code=400,
             detail="Unsupported audio format. Use: WAV, MP3, FLAC, OGG, or M4A"
+        )
+    
+    # Validate file size (max 10MB)
+    audio.file.seek(0, 2)  # Seek to end
+    file_size = audio.file.tell()
+    audio.file.seek(0)  # Reset to beginning
+    
+    if file_size > 10 * 1024 * 1024:  # 10MB
+        raise HTTPException(
+            status_code=400,
+            detail="Audio file too large. Maximum 10MB allowed."
+        )
+    
+    if file_size == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Audio file is empty."
         )
     
     # Save uploaded audio to temp file
@@ -247,6 +335,22 @@ async def clone_voice_async(
     Recommended for longer texts or to avoid HTTP timeouts.
     """
     
+    # Cleanup old jobs periodically
+    cleanup_old_jobs()
+    
+    # Validate text length
+    if len(text) > 2000:
+        raise HTTPException(
+            status_code=400,
+            detail="Text too long. Maximum 2000 characters allowed."
+        )
+    
+    if len(text.strip()) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Text cannot be empty."
+        )
+    
     # Validate language
     if language not in SUPPORTED_LANGUAGES:
         raise HTTPException(
@@ -263,6 +367,23 @@ async def clone_voice_async(
         raise HTTPException(
             status_code=400,
             detail="Unsupported audio format. Use: WAV, MP3, FLAC, OGG, or M4A"
+        )
+    
+    # Validate file size (max 10MB)
+    audio.file.seek(0, 2)  # Seek to end
+    file_size = audio.file.tell()
+    audio.file.seek(0)  # Reset to beginning
+    
+    if file_size > 10 * 1024 * 1024:  # 10MB
+        raise HTTPException(
+            status_code=400,
+            detail="Audio file too large. Maximum 10MB allowed."
+        )
+    
+    if file_size == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Audio file is empty."
         )
     
     # Generate job ID
@@ -409,8 +530,33 @@ async def delete_job(job_id: str):
     if job_id not in jobs:
         raise HTTPException(status_code=404, detail="Job not found")
     
+    # Clean up associated audio file if exists
+    job_data = jobs[job_id]
+    if job_data.get('audio_url'):
+        try:
+            filename = job_data['audio_url'].split('/')[-1]
+            audio_file = OUTPUT_DIR / filename
+            if audio_file.exists():
+                audio_file.unlink()
+        except Exception:
+            pass
+    
     del jobs[job_id]
     return {"message": "Job deleted successfully"}
+
+# --- Cleanup Endpoint ---
+@app.post("/api/admin/cleanup")
+async def trigger_cleanup():
+    """Manually trigger job cleanup (removes old completed/failed jobs)"""
+    jobs_before = len(jobs)
+    cleanup_old_jobs()
+    jobs_after = len(jobs)
+    
+    return {
+        "message": "Cleanup completed",
+        "jobs_removed": jobs_before - jobs_after,
+        "jobs_remaining": jobs_after
+    }
 
 # --- Example Voices ---
 @app.get("/api/examples")
